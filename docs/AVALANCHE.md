@@ -31,31 +31,53 @@ passes.
 
 ## What does not carry over
 
-Two integrations are 0G-specific and have no Avalanche equivalent in this
-repository:
+Two integrations were 0G-specific. One is now solved; one remains optional.
 
 | Component | On 0G | On Avalanche |
 |---|---|---|
-| Genome + transcript blobs | 0G Storage (`lib/storage.js`) | **no equivalent yet** |
-| LLM-judge evaluate() | 0G Compute (`lib/compute.js`) | **no equivalent yet** |
+| Genome + transcript blobs | 0G Storage (`lib/storage.js`) | **`lib/store.js`** — content-addressed, any host |
+| LLM-judge evaluate() | 0G Compute (`lib/compute.js`) | not needed; `evaluate` is the customer's own function |
 | Agentic ID link | ERC-7857 (`linkAgenticId`) | the function is chain-agnostic; the standard's adoption is not |
 
-Storage is the real one. The chain carries a root; the bytes have to live
-somewhere a verifier can fetch them. Options, in order of how much they cost
-to build:
+### Storage: solved by removing the dependency, not replacing it
 
-1. **Content-addressed blobs the customer hosts.** The root is already a
-   keccak hash over canonical bytes (`sdk/canonical.js`), so any HTTP host
-   works and the verifier checks the hash rather than trusting the host. This
-   is the smallest honest answer and it removes a dependency rather than
-   adding one.
-2. IPFS or Arweave, for customers who want the bytes to outlive the vendor.
-3. Nothing at all -- provenance of the *lineage* works with roots alone; only
-   third-party re-scoring needs the transcripts.
+The chain carries a root; the bytes have to live somewhere a verifier can
+fetch them. The obvious move is to find another network-flavoured blob service
+and depend on that instead. That would be the wrong instinct.
 
-The compute integration is optional in the first place: `evaluate` is the
-customer's own function, and `lib/compute.js` exists only for the case where a
-team wants an LLM judge and has no infrastructure for one.
+A root is `keccak256` over canonical bytes (`sdk/canonical.js`), computed by
+us, from bytes we hold. So a reader can check what they were handed. The store
+therefore does not need to be trusted, decentralised, or even well-behaved --
+it needs to return the bytes, and if it returns different ones the hash says so
+and `lib/store.js` refuses them.
+
+So the answer for Avalanche is not another dependency. It is **no** dependency:
+
+```
+GERMLINE_STORE=fs     files under GERMLINE_STORE_DIR (default)
+GERMLINE_STORE=http   read from GERMLINE_STORE_URL, write if PUT is set
+GERMLINE_STORE=0g     delegate to lib/storage.js, unchanged
+```
+
+A plain directory the operator rsyncs to any static host is a complete answer.
+IPFS or Arweave remain available for customers who want the bytes to outlive
+the vendor, but they are a preference now rather than a requirement.
+
+Every read verifies, and there is no flag to disable it -- a store whose
+contents are not checked is a store you are trusting, which is what the root
+exists to avoid. Eight tests cover the refusals specifically, including the
+case that matters: same filename, different bytes.
+
+```bash
+npm run check:store
+```
+
+writes a payload, reads it back, then corrupts it on disk and confirms the read
+is refused.
+
+The compute integration needed no substitute at all: `evaluate` is the
+customer's own function, and `lib/compute.js` exists only for teams who want an
+LLM judge and have no infrastructure for one.
 
 ## Why Avalanche is a good host for this specifically
 
@@ -91,7 +113,9 @@ The faucet is at <https://build.avax.network/console/primary-network/faucet>.
 
 ## Status
 
-- Contract compiles for `paris` and passes 45/45 on a Fuji fork.
+- Contract compiles for `paris`; **53/53 tests pass**, and the suite passes
+  against a live Fuji fork.
 - Networks, explorers and deploy scripts are wired.
+- Storage substitute is **built and tested** (`lib/store.js`), and the 0G
+  Storage dependency is gone unless a customer wants it.
 - **Not yet deployed to Fuji or C-Chain** -- that needs a funded key.
-- Storage substitute is designed, not built.
