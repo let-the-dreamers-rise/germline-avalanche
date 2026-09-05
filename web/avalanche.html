@@ -1,0 +1,500 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Germline on Avalanche</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
+<style>
+  /* ---- tokens ----------------------------------------------------------
+     Carried over from web/index.html: a lab instrument reading out a
+     measurement, not a product dashboard. Flat surfaces, hairlines instead
+     of cards, no shadows, and colour spent only where it carries meaning.
+     The one change for Avalanche is the accent, which moves from 0G gold to
+     Avalanche red -- and stays structural: the lineage spine, the rules, the
+     figures that matter. Pass and fail get their own register, because a red
+     that means "brand" cannot also mean "broken". */
+  :root {
+    --paper:      #edeff2;
+    --panel:      #ffffff;
+    --panel-2:    #f6f7f9;
+    --ink:        #14171c;
+    --ink-dim:    #5a6270;
+    --ink-faint:  #8b939f;
+    --rule:       #d2d7de;
+    --rule-soft:  #e2e6ea;
+    --accent:     #e84142;
+    --accent-ink: #b32b2c;
+    --accent-wash:#fbe9e9;
+    --ok:         #157f5b;
+    --ok-wash:    #e4f2ec;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", ui-sans-serif, Roboto, Helvetica, Arial, sans-serif;
+    --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", -apple-system, "Segoe UI", ui-sans-serif, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0e1013;
+      --panel:      #16191f;
+      --panel-2:    #1b1f26;
+      --ink:        #e8eaee;
+      --ink-dim:    #99a1ad;
+      --ink-faint:  #626a77;
+      --rule:       #2a2f38;
+      --rule-soft:  #21252c;
+      --accent:     #ff5b5c;
+      --accent-ink: #ff8a8b;
+      --accent-wash:#2a1618;
+      --ok:         #45b98c;
+      --ok-wash:    #12241d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #0e1013;
+    --panel:      #16191f;
+    --panel-2:    #1b1f26;
+    --ink:        #e8eaee;
+    --ink-dim:    #99a1ad;
+    --ink-faint:  #626a77;
+    --rule:       #2a2f38;
+    --rule-soft:  #21252c;
+    --accent:     #ff5b5c;
+    --accent-ink: #ff8a8b;
+    --accent-wash:#2a1618;
+    --ok:         #45b98c;
+    --ok-wash:    #12241d;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+  .sheet { max-width: 940px; margin: 0 auto; padding: 0 28px 96px; }
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, .chip:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px;
+  }
+  code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .eyebrow {
+    font-family: var(--cond); font-weight: 700; font-size: 11.5px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint);
+  }
+
+  /* ---- masthead --------------------------------------------------------- */
+  header.mast { padding: 56px 0 0; }
+  .wordmark { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .wordmark h1 {
+    font-family: var(--cond); font-weight: 700; font-size: 30px; margin: 0;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .wordmark .on {
+    font-family: var(--cond); font-weight: 600; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+    border-left: 1px solid var(--rule); padding-left: 16px;
+  }
+  .mast .rule { height: 3px; background: var(--accent); margin: 18px 0 0; }
+  .mast .rule + .rule { height: 1px; background: var(--rule); margin-top: 2px; }
+
+  .thesis {
+    font-size: 21px; line-height: 1.5; margin: 30px 0 0; max-width: 30em;
+    text-wrap: balance; font-weight: 400;
+  }
+  .thesis b { font-weight: 600; }
+  .sub { color: var(--ink-dim); margin: 14px 0 0; max-width: 34em; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; }
+  .chip {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.02em;
+    border: 1px solid var(--rule); background: var(--panel);
+    padding: 5px 10px; color: var(--ink-dim); text-decoration: none;
+  }
+  .chip b { color: var(--ink); font-weight: 600; }
+
+  /* ---- sections --------------------------------------------------------- */
+  section { margin: 64px 0 0; }
+  section > .eyebrow { display: block; margin-bottom: 10px; }
+  h2 {
+    font-family: var(--cond); font-weight: 700; font-size: 25px; margin: 0 0 16px;
+    letter-spacing: 0.01em; text-wrap: balance;
+  }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ---- the mechanism: commit then reveal -------------------------------- */
+  .steps { display: grid; gap: 0; margin: 26px 0 0; border: 1px solid var(--rule); background: var(--panel); }
+  @media (min-width: 760px) { .steps { grid-template-columns: 1fr 1fr; } }
+  .step { padding: 22px 24px 24px; }
+  .step + .step { border-top: 1px solid var(--rule); }
+  @media (min-width: 760px) {
+    .step + .step { border-top: 0; border-left: 1px solid var(--rule); }
+  }
+  .step .n {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    letter-spacing: 0.1em; display: block; margin-bottom: 6px;
+  }
+  .step h3 {
+    font-family: var(--mono); font-weight: 600; font-size: 15px; margin: 0 0 4px;
+  }
+  .step .when { font-size: 13px; color: var(--ink-faint); margin: 0 0 16px; }
+  .step p { font-size: 14px; color: var(--ink-dim); margin: 14px 0 0; max-width: none; }
+
+  .field {
+    font-family: var(--mono); font-size: 12.5px; border: 1px solid var(--rule-soft);
+    background: var(--panel-2); padding: 10px 12px; display: flex; gap: 10px;
+    align-items: baseline; justify-content: space-between;
+  }
+  .field .k { color: var(--ink-faint); }
+  .field .v { color: var(--ink); }
+  /* The block hash does not exist when the breeder commits. Hatching is the
+     honest rendering of a value that is not merely hidden but unwritten. */
+  .field.unresolved { border-style: dashed; }
+  .field.unresolved .v {
+    color: var(--ink-faint);
+    background-image: repeating-linear-gradient(
+      -45deg, var(--rule) 0 1px, transparent 1px 6px);
+    padding: 0 8px; user-select: none;
+  }
+  .field.resolved { border-color: var(--accent); }
+  .field.resolved .v { color: var(--accent-ink); font-weight: 600; }
+
+  .seed {
+    margin: 26px 0 0; border-left: 3px solid var(--accent); background: var(--panel);
+    border-top: 1px solid var(--rule); border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule); padding: 18px 22px;
+    overflow-x: auto;
+  }
+  .seed code { font-size: 13.5px; white-space: pre; display: block; }
+  .seed .cap { font-size: 13px; color: var(--ink-dim); margin: 12px 0 0; max-width: 60ch; }
+
+  /* ---- verification: both outcomes are the feature ---------------------- */
+  .outcomes { display: grid; gap: 14px; margin: 24px 0 0; }
+  @media (min-width: 700px) { .outcomes { grid-template-columns: 1fr 1fr; } }
+  .outcome { border: 1px solid var(--rule); background: var(--panel); padding: 20px 22px; }
+  .outcome .verdict {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ok); background: var(--ok-wash);
+    border: 1px solid var(--ok); padding: 3px 9px; margin-bottom: 14px;
+  }
+  .outcome h3 { font-size: 15.5px; margin: 0 0 8px; font-weight: 600; }
+  .outcome p { font-size: 14px; color: var(--ink-dim); margin: 0; max-width: none; }
+  .outcome .test {
+    font-family: var(--mono); font-size: 12px; color: var(--ink-faint);
+    margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--rule-soft);
+    word-break: break-word;
+  }
+
+  /* ---- tables ----------------------------------------------------------- */
+  .tablewrap { overflow-x: auto; margin: 24px 0 0; border: 1px solid var(--rule); background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td {
+    text-align: right; padding: 11px 16px; white-space: nowrap;
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  th {
+    font-family: var(--cond); font-weight: 700; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint);
+    border-bottom: 1px solid var(--rule);
+  }
+  th:first-child, td:first-child { text-align: left; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.win { color: var(--accent-ink); font-weight: 600; }
+  td.lose { color: var(--ink-faint); }
+
+  /* ---- status list ------------------------------------------------------ */
+  .status { margin: 24px 0 0; border-top: 1px solid var(--rule); }
+  .row {
+    display: flex; gap: 18px; align-items: baseline; justify-content: space-between;
+    padding: 13px 0; border-bottom: 1px solid var(--rule-soft); flex-wrap: wrap;
+  }
+  .row .what { font-size: 14.5px; }
+  .row .val { font-family: var(--mono); font-size: 13px; color: var(--ink-dim); text-align: right; }
+  .row .val.done { color: var(--ok); }
+  .row .val.pending { color: var(--ink-faint); }
+
+  /* ---- command ---------------------------------------------------------- */
+  pre.cmd {
+    margin: 20px 0 0; background: var(--panel); border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent); padding: 16px 20px; overflow-x: auto;
+    font-family: var(--mono); font-size: 13px; line-height: 1.7;
+  }
+  pre.cmd .c { color: var(--ink-faint); }
+
+  footer {
+    margin: 72px 0 0; padding-top: 22px; border-top: 1px solid var(--rule);
+    display: flex; gap: 20px; flex-wrap: wrap; justify-content: space-between;
+    font-size: 13px; color: var(--ink-faint);
+  }
+  footer .links { display: flex; gap: 18px; flex-wrap: wrap; }
+</style>
+
+<div class="sheet">
+
+  <header class="mast">
+    <div class="wordmark">
+      <h1>Germline</h1>
+      <span class="on">Avalanche C&#8209;Chain</span>
+    </div>
+    <div class="rule"></div>
+    <div class="rule"></div>
+
+    <p class="thesis">
+      Your agent has twenty knobs and you tuned three. Germline turns the rest
+      using the eval you already have &mdash; and hands back a result with
+      <b>a lineage anyone can verify without trusting you</b>.
+    </p>
+    <p class="sub">
+      A child configuration is derived, not asserted. Its mutation seed comes
+      from a block that has not been mined yet, so the breeder cannot go
+      looking for a flattering result.
+    </p>
+
+    <div class="chips">
+      <span class="chip"><b>Fuji</b> &middot; 43113</span>
+      <span class="chip"><b>C-Chain</b> &middot; 43114</span>
+      <span class="chip"><b>53</b> tests passing</span>
+      <span class="chip"><b>53</b> against a Fuji fork</span>
+      <span class="chip">EVM target <b>paris</b></span>
+    </div>
+  </header>
+
+  <section>
+    <span class="eyebrow">The mechanism</span>
+    <h2>Reproduction is two transactions, and that is the point</h2>
+    <p>
+      Breeding in one step would let whoever runs it try seeds until one
+      produced a configuration they liked. So it takes two, with a block
+      boundary in between.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <span class="n">TX 1</span>
+        <h3>requestSpawn(parentId)</h3>
+        <p class="when">Commits to breeding at a future block.</p>
+        <div class="field unresolved">
+          <span class="k">blockhash(requestBlock)</span>
+          <span class="v" aria-label="does not exist yet">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+        <p>
+          The hash does not exist. Nothing about the child can be computed,
+          predicted, or shopped for &mdash; not by the breeder, not by anyone.
+        </p>
+      </div>
+      <div class="step">
+        <span class="n">TX 2</span>
+        <h3>spawn(&hellip;)</h3>
+        <p class="when">Reveals the child, afterwards.</p>
+        <div class="field resolved">
+          <span class="k">blockhash(requestBlock)</span>
+          <span class="v">0x7c2f&hellip;a91e</span>
+        </div>
+        <p>
+          Now the seed is fixed and the only remaining choices are to accept
+          the child or abandon it &mdash; and abandoning it is recorded too.
+        </p>
+      </div>
+    </div>
+
+    <div class="seed">
+      <code>seed = keccak256(parentGenomeRoot, blockhash(requestBlock), parentId, ordinal)</code>
+      <p class="cap">
+        Anyone holding the parent re-runs the mutation offline and compares it
+        against the child root on chain. A forged lineage fails arithmetic
+        rather than failing to be believed.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Verification</span>
+    <h2>Both outcomes are the feature working</h2>
+    <p>
+      A verifier that only ever says yes has told you nothing. These two tests
+      run on every commit, and against a fork of Avalanche Fuji.
+    </p>
+    <div class="outcomes">
+      <div class="outcome">
+        <span class="verdict">Accepted</span>
+        <h3>An honest child</h3>
+        <p>
+          Bred through the real two-transaction path, re-derived from its
+          parent and seed, and matched against what the chain recorded.
+        </p>
+        <p class="test">breeds one honest child that verify.js accepts as genuine</p>
+      </div>
+      <div class="outcome">
+        <span class="verdict">Refused</span>
+        <h3>A forged child</h3>
+        <p>
+          Same parent, same seed, a configuration that seed could not have
+          produced. The root disagrees, so it is rejected &mdash; no judgement
+          call, no trust involved.
+        </p>
+        <p class="test">rejects a forged child whose genome root does not match its recorded seed</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">The benchmark we would rather you saw from us</span>
+    <h2>Random sampling beats our own search, and we ship the control</h2>
+    <p>
+      An earlier version of this project claimed the search captured 80% of the
+      available headroom for 21% of the budget. Both numbers were true and the
+      claim was still wrong, because nobody had asked what random sampling does
+      with the same budget.
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Landscape</th>
+            <th scope="col">Space</th>
+            <th scope="col">Budget</th>
+            <th scope="col">Sampled</th>
+            <th scope="col">Evolution</th>
+            <th scope="col">Random</th>
+            <th scope="col">Winner</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Synthetic, smooth</td><td>216</td><td>45</td><td>20.83%</td>
+            <td class="lose">7821</td><td>9159</td><td class="win">Random</td>
+          </tr>
+          <tr>
+            <td>Synthetic, rugged</td><td>216</td><td>45</td><td>20.83%</td>
+            <td class="lose">5225</td><td>9500</td><td class="win">Random</td>
+          </tr>
+          <tr>
+            <td>ARC corpus, real data</td><td>6144</td><td>38</td><td>0.62%</td>
+            <td>4865</td><td class="lose">4765</td><td class="win">Evolution</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:18px">
+      The deciding column is <b>sampled</b>, not the size of the space. When you
+      can afford a fifth of every possible configuration, drawing at random is
+      close to optimal and no selection machinery earns its keep. Under one
+      percent &mdash; which is what a real configuration space looks like, and
+      the only row above built on recorded data &mdash; selection is ahead.
+    </p>
+    <p>
+      So Germline does not sell a better optimiser. It sells a verifiable record
+      of whatever search you ran, and <code>search()</code> ships the random
+      control switched on, reporting <code>run.verdict.winner</code>. If random
+      wins on your space, use it and keep the lineage.
+    </p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Why this chain</span>
+    <h2>Two reasons specific to this mechanism</h2>
+    <p>
+      <b>Finality is dead time here.</b> The wait between commit and reveal
+      exists for a security reason that cannot be optimised away &mdash; the
+      seed must not exist when the breeder commits. That wait is time a user
+      spends watching a spinner. Sub-second finality turns a security
+      requirement into a non-issue; on a slow chain this mechanism is genuinely
+      unpleasant to use.
+    </p>
+    <p>
+      <b>A per-customer L1 is the regulated-deployment story.</b> Provenance
+      sells to teams whose own customers ask which version produced a given
+      output &mdash; finance, health, anything audited. Those buyers frequently
+      cannot put anything on a public chain. An Avalanche L1 lets a customer run
+      the same registry, the same contract and the same verifier on a chain they
+      control. That product shape does not exist on a monolithic chain.
+    </p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Portability</span>
+    <h2>The storage dependency was removed, not replaced</h2>
+    <p>
+      The chain carries a root; the bytes have to live somewhere. On 0G that was
+      0G Storage. The obvious way to leave is to depend on some other blob
+      service instead &mdash; which trades one dependency for another and calls
+      it portability.
+    </p>
+    <p>
+      But a root is <code>keccak256</code> over canonical bytes, computed here,
+      from bytes we hold. A reader can check what they were handed. So the store
+      does not need to be trusted, decentralised, or even well behaved: it needs
+      to return the bytes, and if it returns different ones the hash says so and
+      the read is refused. A plain directory served over HTTP is a complete
+      answer.
+    </p>
+    <pre class="cmd">GERMLINE_STORE=fs     <span class="c"># files on disk, no dependencies (default)</span>
+GERMLINE_STORE=http   <span class="c"># any static host; reads are verified</span>
+GERMLINE_STORE=0g     <span class="c"># 0G Storage, still available</span></pre>
+  </section>
+
+  <section>
+    <span class="eyebrow">Status</span>
+    <h2>What is built, and what is not</h2>
+    <div class="status">
+      <div class="row">
+        <span class="what">Contract, tests, SDK, verifier</span>
+        <span class="val done">53 passing</span>
+      </div>
+      <div class="row">
+        <span class="what">Full suite against an Avalanche Fuji fork</span>
+        <span class="val done">53 passing</span>
+      </div>
+      <div class="row">
+        <span class="what">Content-addressed store, reads verified</span>
+        <span class="val done">built &amp; tested</span>
+      </div>
+      <div class="row">
+        <span class="what">Networks, Snowtrace links, deploy scripts</span>
+        <span class="val done">wired</span>
+      </div>
+      <div class="row">
+        <span class="what">Registry live on 0G mainnet since 3 Sep 2026</span>
+        <span class="val">0xA0448C&hellip;5F7b25</span>
+      </div>
+      <div class="row">
+        <span class="what">Deployed to Fuji or C-Chain</span>
+        <span class="val pending">not yet &mdash; needs a funded key</span>
+      </div>
+      <div class="row">
+        <span class="what">An outside team running a real eval through it</span>
+        <span class="val pending">not yet</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Check it yourself</span>
+    <h2>The Avalanche claim, in one command</h2>
+    <p>
+      The heredity is seeded from <code>blockhash</code>. A chain that served
+      historical block hashes differently would break commit-reveal silently
+      &mdash; every child seeded from zero, every lineage verifying against a
+      constant, and a green test suite the whole time. So it is checked against
+      a real fork rather than asserted.
+    </p>
+    <pre class="cmd">git clone https://github.com/let-the-dreamers-rise/germline
+cd germline &amp;&amp; npm install
+FORK_RPC=https://api.avax-test.network/ext/bc/C/rpc npx hardhat test</pre>
+  </section>
+
+  <footer>
+    <span>Germline &middot; verifiable heredity for AI configuration</span>
+    <span class="links">
+      <a href="https://github.com/let-the-dreamers-rise/germline">Repository</a>
+      <a href="https://chainscan.0g.ai/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25">0G registry</a>
+      <a href="index.html">Lineage viewer</a>
+    </span>
+  </footer>
+
+</div>
