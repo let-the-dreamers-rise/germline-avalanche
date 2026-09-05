@@ -33,9 +33,19 @@ On a real system -- the world model of an agent that plays ARC-AGI-3 -- it
 took a configuration scoring 3148 to one scoring 4765, and the answer it found
 is one a competent engineer would not have guessed. Details below.
 
-Turn on provenance when you need to show someone. That part uses 0G Chain, and
+Turn on provenance when you need to show someone. That part uses a chain, and
 it is the reason a chain is involved at all: a customer verifies the record
 themselves rather than trusting the vendor who produced it.
+
+> **This fork targets Avalanche C-Chain.** The heredity mechanism is plain
+> ERC-721 plus `keccak256` and `blockhash`, and the suite passes 53/53 against
+> a live Fuji fork — including the forged child it must reject. The 0G Storage
+> dependency is gone: payloads are content-addressed over the root the chain
+> already carries, so a plain directory or any static host works and every read
+> is verified. See **[docs/AVALANCHE.md](docs/AVALANCHE.md)**.
+>
+> The original registry remains live on 0G mainnet, and the upstream project is
+> at [let-the-dreamers-rise/germline](https://github.com/let-the-dreamers-rise/germline).
 
 ```js
 const { defineTrial, optimise } = require("germline");
