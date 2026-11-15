@@ -25,6 +25,8 @@ const { eventFrom } = require("../lib/chain");
 const { found } = require("../scripts/found");
 const { breed } = require("../scripts/breed");
 const { verify } = require("../scripts/verify");
+const { forge } = require("../scripts/forge");
+const { e2e } = require("../scripts/e2e");
 
 const SURVIVAL = 3148; // the measured action-only baseline; see engine/fitness.js
 const STEP = 500;
@@ -238,5 +240,22 @@ describe("lifecycle scripts", function () {
     // the forgery this test exercises is heredity, and heredity alone.
     expect(caught.result.fitness.scoreHolds).to.equal(true);
     expect(caught.result.fitness.evidenceHolds).to.equal(true);
+  });
+  it("forge.js mints a forged child and verify.js rejects it", async function () {
+    await found({ log: noop });
+    const result = await withBlockPump(forge({ parentId: 1, log: noop }));
+    expect(result.childId).to.equal(2);
+    expect(result.forgedRoot).to.not.equal(result.honestRoot);
+    expect(result.verdict.genuine).to.equal(false);
+    expect(result.verdict.mismatches).to.include("heredity");
+  });
+
+  it("e2e.js runs found, breed, verify and forge, and writes a receipt", async function () {
+    const receipt = await withBlockPump(e2e({ log: noop }));
+    expect(receipt.honestChild.verdict).to.equal("GENUINE");
+    expect(receipt.forgedChild.verdict).to.equal("FORGED");
+    expect(receipt.forgedChild.failed).to.include("heredity");
+    const file = path.join(deploymentsDir, hre.network.name + "-e2e.json");
+    expect(fs.existsSync(file)).to.equal(true);
   });
 });

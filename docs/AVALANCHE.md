@@ -113,9 +113,11 @@ The faucet is at <https://build.avax.network/console/primary-network/faucet>.
 
 ## Status
 
-- Contract compiles for `paris`; **53/53 tests pass**, and the suite passes
+- Contract compiles for `paris`; **55/55 tests pass** locally, and the original 53 pass
   against a live Fuji fork.
 - Networks, explorers and deploy scripts are wired.
 - Storage substitute is **built and tested** (`lib/store.js`), and the 0G
   Storage dependency is gone unless a customer wants it.
-- **Not yet deployed to Fuji or C-Chain** -- that needs a funded key.
+- **Not yet deployed to Fuji or C-Chain** -- that needs a funded key. The
+  exact steps, including a live forged-child check, are in
+  [FUJI-RUNBOOK.md](FUJI-RUNBOOK.md): `npm run e2e:fuji`.

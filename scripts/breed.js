@@ -366,4 +366,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { breed };
+module.exports = { breed, waitForSeed };
