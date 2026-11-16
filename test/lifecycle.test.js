@@ -269,8 +269,55 @@ describe("lifecycle scripts", function () {
       if (to - from > 3) throw new Error("block range too large");
       return real(filter, from, to);
     };
+    process.env.GERMLINE_LOG_PAUSE_MS = "0";
     const events = await queryAll(germline, germline.filters.Spawned(), { fromBlock: 0, span: 50 });
+    delete process.env.GERMLINE_LOG_PAUSE_MS;
     germline.queryFilter = real;
     expect(events.map((e) => Number(e.args.id))).to.include(child.childId);
+  });
+  it("queryAll waits out a throttling RPC instead of failing", async function () {
+    const { queryAll } = require("../lib/chain");
+    await found({ log: noop });
+    await withBlockPump(breed({ parentId: 1, log: noop }));
+    const germline = this.germline;
+    const real = germline.queryFilter.bind(germline);
+    let calls = 0;
+    germline.queryFilter = async (filter, from, to) => {
+      calls++;
+      if (calls % 2 === 1) throw new Error("Too Many Requests");
+      return real(filter, from, to);
+    };
+    process.env.GERMLINE_LOG_PAUSE_MS = "0";
+    process.env.GERMLINE_RPC_DELAY_MS = "1";
+    const events = await queryAll(germline, germline.filters.Spawned(), {
+      fromBlock: 0,
+      span: 5,
+    });
+    germline.queryFilter = real;
+    delete process.env.GERMLINE_LOG_PAUSE_MS;
+    delete process.env.GERMLINE_RPC_DELAY_MS;
+    expect(events.length).to.equal(1);
+  });
+
+  it("verify.js finds the birth block without scanning every log", async function () {
+    await found({ log: noop });
+    const child = await withBlockPump(breed({ parentId: 1, log: noop }));
+    // Pad the chain so a full scan would need many windows, then refuse any
+    // log query wider than 3 blocks from the start of the chain.
+    await mine(400);
+    const germline = this.germline;
+    const realFactory = ethers.Contract.prototype.queryFilter;
+    let wide = 0;
+    ethers.Contract.prototype.queryFilter = async function (filter, from, to) {
+      if (to - from > 350) wide++;
+      return realFactory.call(this, filter, from, to);
+    };
+    try {
+      const result = await verify({ childId: child.childId, log: noop });
+      expect(result.seed.holds).to.equal(true);
+      expect(wide).to.equal(0);
+    } finally {
+      ethers.Contract.prototype.queryFilter = realFactory;
+    }
   });
 });
