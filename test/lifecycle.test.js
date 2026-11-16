@@ -258,4 +258,19 @@ describe("lifecycle scripts", function () {
     const file = path.join(deploymentsDir, hre.network.name + "-e2e.json");
     expect(fs.existsSync(file)).to.equal(true);
   });
+  it("verify.js re-derives the seed when the RPC caps log ranges", async function () {
+    const { queryAll } = require("../lib/chain");
+    await found({ log: noop });
+    const child = await withBlockPump(breed({ parentId: 1, log: noop }));
+    // Simulate a provider that refuses any range wider than 3 blocks.
+    const germline = this.germline;
+    const real = germline.queryFilter.bind(germline);
+    germline.queryFilter = async (filter, from, to) => {
+      if (to - from > 3) throw new Error("block range too large");
+      return real(filter, from, to);
+    };
+    const events = await queryAll(germline, germline.filters.Spawned(), { fromBlock: 0, span: 50 });
+    germline.queryFilter = real;
+    expect(events.map((e) => Number(e.args.id))).to.include(child.childId);
+  });
 });

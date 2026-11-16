@@ -44,6 +44,11 @@ themselves rather than trusting the vendor who produced it.
 > already carries, so a plain directory or any static host works and every read
 > is verified. See **[docs/AVALANCHE.md](docs/AVALANCHE.md)**.
 >
+> **Live on Avalanche Fuji:** [`0xA0448Cd6…7b25`](https://testnet.snowtrace.io/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25)
+> (verified on Snowtrace). Honest child [#2](https://testnet.snowtrace.io/tx/0x3895bd8673e34cd8305cc8570a2c95a28c63762c691f6f3c62d1148fdaee338a)
+> verifies GENUINE; forged child [#3](https://testnet.snowtrace.io/tx/0xc5a19232d52a0152981d6ead72a460bae71f1e0532052a36574e3e8091a71223)
+> verifies FORGED. C-Chain mainnet is next.
+>
 > The original registry remains live on 0G mainnet, and the upstream project is
 > at [let-the-dreamers-rise/germline](https://github.com/let-the-dreamers-rise/germline).
 

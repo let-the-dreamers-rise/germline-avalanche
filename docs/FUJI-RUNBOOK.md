@@ -56,7 +56,8 @@ npm run e2e:avalanche
 
 ## Notes
 
-- `verify.js` reads events in 2,000-block windows from the deployment block,
-  because the public Avalanche RPC refuses wide `eth_getLogs` ranges. Set
-  `GERMLINE_LOG_SPAN` lower if a provider caps it tighter.
+- `verify.js` reads events in 100-block windows from the deployment block,
+  because the public Fuji RPC refuses `eth_getLogs` ranges wider than 100
+  blocks. If a provider refuses even that, it halves the window and retries.
+  `GERMLINE_LOG_SPAN` overrides the starting window.
 - Commit the `deployments/*.json` files afterwards so the addresses are public.
