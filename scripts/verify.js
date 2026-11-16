@@ -29,15 +29,17 @@ const { mutate } = require("../engine/mutate");
 const { evaluate } = require("../engine/fitness");
 const { genomeForRoot } = require("../engine/space");
 const genomes = require("../lib/genomes");
-const { loadDeployment, assertChainMatches } = require("../lib/chain");
+const { loadDeployment, assertChainMatches, queryAll } = require("../lib/chain");
 
 // Recover the ordinal this child was born under -- the number of siblings the
 // parent had already produced -- and the block it was born in. The contract
 // folds the ordinal into the seed and then keeps only the running total, so
 // the count has to come back out of the log.
-async function birthOf(germline, parentId, childId) {
-  const events = await germline.queryFilter(
-    germline.filters.Spawned(null, parentId)
+async function birthOf(germline, parentId, childId, fromBlock) {
+  const events = await queryAll(
+    germline,
+    germline.filters.Spawned(null, parentId),
+    { fromBlock }
   );
   const ordered = events.sort(
     (a, b) => a.blockNumber - b.blockNumber || a.index - b.index
@@ -68,14 +70,14 @@ async function resolveContract(hre) {
   if (process.env.CONTRACT) return { address: process.env.CONTRACT };
   const record = loadDeployment(hre);
   await assertChainMatches(hre, record);
-  return { address: record.address };
+  return { address: record.address, fromBlock: record.deployBlock };
 }
 
 /// Verify one organism's lineage and attestation. Throws on any mismatch, so
 /// a caller that wants a non-zero exit code needs to do nothing further.
 async function verify(options = {}) {
   const log = options.log || console.log;
-  const { address } = await resolveContract(hre);
+  const { address, fromBlock } = await resolveContract(hre);
   const germline = await hre.ethers.getContractAt("Germline", address);
 
   let childId =
@@ -156,10 +158,12 @@ async function verify(options = {}) {
   // what a node will serve, not evidence against the lineage.
   let seedCheck = null;
   try {
-    const birth = await birthOf(germline, child.parent, childId);
+    const birth = await birthOf(germline, child.parent, childId, fromBlock);
     const ordinal = birth.ordinal;
-    const requests = await germline.queryFilter(
-      germline.filters.SpawnRequested(child.parent)
+    const requests = await queryAll(
+      germline,
+      germline.filters.SpawnRequested(child.parent),
+      { fromBlock }
     );
     // The commitment this birth consumed is the parent's latest request made
     // before the child was minted; earlier ones were spent by its siblings.

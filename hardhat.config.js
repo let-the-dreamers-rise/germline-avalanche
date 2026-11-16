@@ -55,7 +55,9 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: { zerog: "none" },
+    // Snowtrace verification goes through Routescan, which accepts any
+    // placeholder key. npx hardhat verify --network fuji <address> 3148 500 4
+    apiKey: { zerog: "none", fuji: "snowtrace", avalanche: "snowtrace" },
     customChains: [
       {
         network: "zerog",
@@ -63,6 +65,22 @@ module.exports = {
         urls: {
           apiURL: "https://chainscan.0g.ai/open/api",
           browserURL: "https://chainscan.0g.ai",
+        },
+      },
+      {
+        network: "fuji",
+        chainId: 43113,
+        urls: {
+          apiURL: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan",
+          browserURL: "https://testnet.snowtrace.io",
+        },
+      },
+      {
+        network: "avalanche",
+        chainId: 43114,
+        urls: {
+          apiURL: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
+          browserURL: "https://snowtrace.io",
         },
       },
     ],

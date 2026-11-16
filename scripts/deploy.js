@@ -5,6 +5,9 @@
 const hre = require("hardhat");
 const fs = require("fs");
 const path = require("path");
+const { addressLink, txLink } = require("../lib/chain");
+
+const CURRENCY = { zerog: "0G", galileo: "0G", fuji: "AVAX", avalanche: "AVAX" };
 
 // engine/fitness.js measures the action-only baseline at 3148 bps on the
 // shipped corpus. Anything below that is not worth reproducing, because it is
@@ -26,7 +29,7 @@ async function main() {
 
   console.log("network:  ", network);
   console.log("deployer: ", deployer.address);
-  console.log("balance:  ", hre.ethers.formatEther(balance), "0G");
+  console.log("balance:  ", hre.ethers.formatEther(balance), CURRENCY[network] || "ETH");
 
   if (balance === 0n) {
     throw new Error(
@@ -51,8 +54,10 @@ async function main() {
   console.log("  threshold:", SURVIVAL_THRESHOLD, "bps");
   console.log("  step:     ", FECUNDITY_STEP, "bps per child");
   console.log("  base:     ", BASE_FECUNDITY, "offspring when viable");
-  if (network === "zerog") {
-    console.log("  explorer: https://chainscan.0g.ai/address/" + address);
+  const deployReceipt = await tx.wait();
+  if (addressLink(network, address)) {
+    console.log("  explorer: " + addressLink(network, address));
+    console.log("  deploy tx:" , txLink(network, tx.hash));
   }
 
   const dir = path.join(__dirname, "..", "deployments");
@@ -65,6 +70,7 @@ async function main() {
         chainId: Number((await hre.ethers.provider.getNetwork()).chainId),
         address,
         deployTx: tx.hash,
+        deployBlock: deployReceipt.blockNumber,
         deployer: deployer.address,
         survivalThreshold: SURVIVAL_THRESHOLD,
         fecundityStep: FECUNDITY_STEP,
