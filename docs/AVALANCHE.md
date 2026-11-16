@@ -113,11 +113,23 @@ The faucet is at <https://build.avax.network/console/primary-network/faucet>.
 
 ## Status
 
-- Contract compiles for `paris`; **55/55 tests pass** locally, and the original 53 pass
+- Contract compiles for `paris`; **56/56 tests pass** locally, and the original 53 pass
   against a live Fuji fork.
 - Networks, explorers and deploy scripts are wired.
 - Storage substitute is **built and tested** (`lib/store.js`), and the 0G
   Storage dependency is gone unless a customer wants it.
-- **Not yet deployed to Fuji or C-Chain** -- that needs a funded key. The
-  exact steps, including a live forged-child check, are in
-  [FUJI-RUNBOOK.md](FUJI-RUNBOOK.md): `npm run e2e:fuji`.
+- **Live on Fuji** since 16 Nov 2026 at
+  [`0xA0448Cd63f746a60447cfF1817ec9781C25F7b25`](https://testnet.snowtrace.io/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25),
+  source verified on Snowtrace. The full flow ran on chain: an honest child
+  verifies GENUINE and a deliberately forged child verifies FORGED. Every
+  transaction is in [`deployments/fuji-e2e.json`](../deployments/fuji-e2e.json).
+  (The address matches the 0G registry because it is the same deployer at the
+  same nonce. It is a separate contract on a separate chain.)
+- **C-Chain mainnet: not yet.** Same commands with `avalanche` in place of
+  `fuji`; see [FUJI-RUNBOOK.md](FUJI-RUNBOOK.md).
+
+Re-check the forged child yourself (PowerShell):
+
+```powershell
+$env:CHILD_ID=3; npx hardhat run scripts/verify.js --network fuji
+```
