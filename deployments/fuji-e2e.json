@@ -1,0 +1,30 @@
+{
+  "network": "fuji",
+  "chainId": 43113,
+  "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+  "contractLink": "https://testnet.snowtrace.io/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+  "deployTx": "https://testnet.snowtrace.io/tx/0x0fff24762d02e1bdd3d0053d038a995017e2e61ea14c9633f0d22c7cad8d3de9",
+  "founder": {
+    "id": 1,
+    "foundTx": "https://testnet.snowtrace.io/tx/0xfab44054ae42b1139a53adf794b78342494f169c203612c4fa334ff19ce63ac1",
+    "attestTx": "https://testnet.snowtrace.io/tx/0x5ae608fdeb93cc0b0e6983db7a102a9d0d70bf633262ec46e28ed0aa92237da0"
+  },
+  "honestChild": {
+    "id": 2,
+    "requestSpawnTx": "https://testnet.snowtrace.io/tx/0xdddd9ecd080015d431a9387ccfb28d17e40cdb13672e1dce7ffd273c37ff4247",
+    "spawnTx": "https://testnet.snowtrace.io/tx/0x3895bd8673e34cd8305cc8570a2c95a28c63762c691f6f3c62d1148fdaee338a",
+    "attestTx": "https://testnet.snowtrace.io/tx/0x097d6c07ce6d445ccc59b92ef69760c44230be75c64dac6dd91bd0f51a629c30",
+    "verdict": "GENUINE"
+  },
+  "forgedChild": {
+    "id": 3,
+    "requestSpawnTx": "https://testnet.snowtrace.io/tx/0x6dde95396c9dac6f0b3aef6deb22e19e041114ba0be1b44fdc62117db5deeb01",
+    "spawnTx": "https://testnet.snowtrace.io/tx/0xc5a19232d52a0152981d6ead72a460bae71f1e0532052a36574e3e8091a71223",
+    "attestTx": "https://testnet.snowtrace.io/tx/0xf979a1cfc6511d94104a0952149a2d6b23515d417c6e76b358c9fb34a11345fd",
+    "verdict": "FORGED",
+    "failed": [
+      "heredity"
+    ]
+  },
+  "ranAt": "2026-11-16T17:08:25.748Z"
+}
