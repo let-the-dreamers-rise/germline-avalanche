@@ -320,4 +320,43 @@ describe("lifecycle scripts", function () {
       ethers.Contract.prototype.queryFilter = realFactory;
     }
   });
+  it("verify.js finishes even when the RPC throttles every few calls", async function () {
+    await found({ log: noop });
+    // A mutation can land on a genome already born ("stillborn"); that is a
+    // real outcome of descent, so try the next commitment rather than fail.
+    let child = null;
+    for (let attempt = 0; attempt < 4 && !child; attempt++) {
+      try {
+        child = await withBlockPump(breed({ parentId: 1, log: noop }));
+      } catch (error) {
+        if (!/stillborn/.test(error.message)) throw error;
+      }
+    }
+    const provider = hre.network.provider;
+    const original = provider.send;
+    const wasHardened = provider.__germlineHardened;
+    delete provider.__germlineHardened;
+    let calls = 0;
+    let refused = 0;
+    provider.send = function (method, params) {
+      calls++;
+      if (calls % 4 === 0) {
+        refused++;
+        return Promise.reject(new Error("Too Many Requests"));
+      }
+      return original.call(provider, method, params);
+    };
+    process.env.GERMLINE_RPC_DELAY_MS = "1";
+    try {
+      const result = await verify({ childId: child.childId, log: noop });
+      expect(refused).to.be.greaterThan(0);
+      expect(result.genuine).to.equal(true);
+      expect(result.seed.holds).to.equal(true);
+    } finally {
+      provider.send = original;
+      if (wasHardened) provider.__germlineHardened = wasHardened;
+      else delete provider.__germlineHardened;
+      delete process.env.GERMLINE_RPC_DELAY_MS;
+    }
+  });
 });

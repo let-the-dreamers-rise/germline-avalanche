@@ -34,6 +34,7 @@ const {
   assertChainMatches,
   queryAll,
   withRetry,
+  hardenProvider,
   firstBlockAtOrAfter,
 } = require("../lib/chain");
 
@@ -119,6 +120,8 @@ async function resolveContract(hre) {
 /// a caller that wants a non-zero exit code needs to do nothing further.
 async function verify(options = {}) {
   const log = options.log || console.log;
+  // A public RPC throttles bursts; every read below should wait, not crash.
+  hardenProvider(hre);
   const { address, fromBlock } = await resolveContract(hre);
   const germline = await hre.ethers.getContractAt("Germline", address);
 

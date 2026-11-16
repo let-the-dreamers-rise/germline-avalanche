@@ -61,7 +61,8 @@ npm run e2e:avalanche
   blocks. If a provider refuses even that, it halves the window and retries.
   `GERMLINE_LOG_SPAN` overrides the starting window.
 - The public RPC also throttles bursts ("Too Many Requests"). Every RPC call
-  in the verifier waits and retries with backoff instead of failing, and
+  hardhat sends during a verify waits and retries with backoff (up to about
+  a minute) instead of failing, and
   verify.js finds a child's birth block from its recorded birth time (a
   binary search), then reads only the 250 blocks before it. So a re-check
   costs a few dozen small requests however old the contract is.

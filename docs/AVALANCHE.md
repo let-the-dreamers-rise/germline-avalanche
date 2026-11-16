@@ -113,7 +113,7 @@ The faucet is at <https://build.avax.network/console/primary-network/faucet>.
 
 ## Status
 
-- Contract compiles for `paris`; **58/58 tests pass** locally, and the original 53 pass
+- Contract compiles for `paris`; **59/59 tests pass** locally, and the original 53 pass
   against a live Fuji fork.
 - Networks, explorers and deploy scripts are wired.
 - Storage substitute is **built and tested** (`lib/store.js`), and the 0G
