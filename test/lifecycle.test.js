@@ -28,6 +28,8 @@ const { verify } = require("../scripts/verify");
 const { forge } = require("../scripts/forge");
 const { e2e, breedAlive } = require("../scripts/e2e");
 const { recheck } = require("../scripts/recheck");
+const { publishPayloads } = require("../scripts/publish-payloads");
+const { payloadCheck } = require("../scripts/payload-check");
 const { checkLive } = require("../sdk/live-check");
 const { check, ABI: CHECK_ABI } = require("../scripts/check");
 
@@ -289,6 +291,37 @@ describe("lifecycle scripts", function () {
     } finally {
       delete process.env.GERMLINE_POLL_MS;
     }
+  });
+  it("publishes every payload behind a live lineage, and each one checks against its root", async function () {
+    const receipt = await withBlockPump(e2e({ log: noop }));
+    const out = path.join(tmpDir, "public-blobs");
+    const { entries } = await publishPayloads({ log: noop, outDir: out });
+    // Founder, honest child and forged child: a genome and an evidence root each.
+    expect(entries.filter((e) => e.kind === "genome").map((e) => e.organism)).to.deep.equal([1, 2, 3]);
+    expect(entries.filter((e) => e.kind === "evidence")).to.have.length(3);
+    for (const e of entries) {
+      const bytes = fs.readFileSync(path.join(out, e.root + ".json"), "utf8");
+      expect(ethers.keccak256(ethers.toUtf8Bytes(bytes))).to.equal(e.root);
+    }
+    const index = JSON.parse(fs.readFileSync(path.join(out, "index.json"), "utf8"));
+    expect(index.payloads).to.have.length(entries.length);
+
+    const saved = { dir: process.env.GERMLINE_STORE_DIR, backend: process.env.GERMLINE_STORE };
+    process.env.GERMLINE_STORE_DIR = out;
+    delete process.env.GERMLINE_STORE;
+    try {
+      expect(await payloadCheck({ log: noop })).to.deep.equal({ ok: entries.length, total: entries.length });
+      // A tampered file is refused, not served.
+      const victim = path.join(out, entries[0].root + ".json");
+      fs.writeFileSync(victim, fs.readFileSync(victim, "utf8") + " ");
+      let caught = null;
+      try { await payloadCheck({ log: noop }); } catch (error) { caught = error; }
+      expect(String(caught && caught.message)).to.match(/1 payload\(s\) failed/);
+    } finally {
+      if (saved.dir === undefined) delete process.env.GERMLINE_STORE_DIR; else process.env.GERMLINE_STORE_DIR = saved.dir;
+      if (saved.backend !== undefined) process.env.GERMLINE_STORE = saved.backend;
+    }
+    expect(receipt.forgedChild.verdict).to.equal("FORGED");
   });
   it("e2e.js commits again when a seed is stillborn, instead of abandoning the run", async function () {
     const stillborn = () => new Error("stillborn: the seed produced 0x00, a genome that already exists");

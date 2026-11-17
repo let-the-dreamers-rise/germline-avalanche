@@ -63,6 +63,23 @@ A plain directory the operator rsyncs to any static host is a complete answer.
 IPFS or Arweave remain available for customers who want the bytes to outlive
 the vendor, but they are a preference now rather than a requirement.
 
+The live lineages use exactly that. Every genome and evidence payload behind
+the Fuji and C-Chain mainnet records is served by the site, one file per root:
+
+```
+https://germline-avalanche.vercel.app/blobs/<root>.json
+https://germline-avalanche.vercel.app/blobs/index.json   which organism, on which network, each root belongs to
+```
+
+`npm run payloads:fuji` and `npm run payloads:avalanche` read the population
+from the chain and write those files into `web/blobs/`, keeping only bytes that
+hash to the root the chain recorded. Anyone can then fetch and check all of
+them with no key and no chain access:
+
+```
+GERMLINE_STORE=http GERMLINE_STORE_URL=https://germline-avalanche.vercel.app/blobs npm run check:payloads
+```
+
 Every read verifies, and there is no flag to disable it -- a store whose
 contents are not checked is a store you are trusting, which is what the root
 exists to avoid. Eight tests cover the refusals specifically, including the
@@ -113,7 +130,7 @@ The faucet is at <https://build.avax.network/console/primary-network/faucet>.
 
 ## Status
 
-- Contract compiles for `paris`; **73/73 tests pass** locally, and the original 53 pass
+- Contract compiles for `paris`; **74/74 tests pass** locally, and the original 53 pass
   against a live Fuji fork.
 - Networks, explorers and deploy scripts are wired.
 - Storage substitute is **built and tested** (`lib/store.js`), and the 0G
