@@ -54,7 +54,12 @@ themselves rather than trusting the vendor who produced it.
 > key, on every push; the verdict table is on each run's summary page. To do
 > the same yourself: `npm install`, then `npm run recheck:fuji`.
 >
-> **Try it yourself:** `npm install`, then `npm run try:local` (a minute, no
+> **Try it in your browser, nothing to install:**
+> **[germline try page](https://raw.githack.com/let-the-dreamers-rise/germline-avalanche/main/web/try.html)**. It runs a real
+> search on your screen, then records it on Fuji from a throwaway test wallet
+> and checks every organism against the chain.
+>
+> **Or on your machine:** `npm install`, then `npm run try:local` (a minute, no
 > wallet), or `npm run wallet` and `npm run try:fuji` to record a real search on
 > Fuji from your own wallet. Plugging in your own eval is one file.
 > See **[docs/TRY.md](docs/TRY.md)**.

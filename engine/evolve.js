@@ -10,19 +10,8 @@ const { FOUNDER, genomeRoot, phenotype } = require("./genome");
 const { mutate } = require("./mutate");
 const { evaluate } = require("./fitness");
 
-// Mirrors Germline.spawnAllowance. Kept in step with the contract by the
-// test in test/engine.test.js, which checks the two agree.
-function spawnAllowance(
-  fitnessBps,
-  survivalThreshold,
-  fecundityStep,
-  baseFecundity
-) {
-  if (fitnessBps < survivalThreshold) return 0;
-  return (
-    baseFecundity + Math.floor((fitnessBps - survivalThreshold) / fecundityStep)
-  );
-}
+// Mirrors Germline.spawnAllowance; see engine/allowance.js.
+const { spawnAllowance } = require("./allowance");
 
 // A stand-in for blockhash, for simulations that never touch a chain. Named
 // so nobody mistakes a simulated lineage for a real one.

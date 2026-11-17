@@ -46,12 +46,14 @@
     "try:local": "hardhat run scripts/try.js",
     "try:fuji": "hardhat run scripts/try.js --network fuji",
     "wallet": "node scripts/wallet.js",
+    "build:web": "node scripts/build-web.js",
     "forge:fuji": "hardhat run scripts/forge.js --network fuji"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.10",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "esbuild": "^0.24.0",
+    "hardhat": "^2.22.10"
   },
   "dependencies": {
     "@openzeppelin/contracts": "4.9.6"

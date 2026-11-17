@@ -18,7 +18,7 @@
 // and attests on 0G as it goes, so a team can validate the search locally
 // first and turn provenance on later without changing how they call this.
 
-const { spawnAllowance } = require("../engine/evolve");
+const { spawnAllowance } = require("../engine/allowance");
 const { localSeed } = require("./seed");
 const { waitForSeed, eventFrom } = require("./chain");
 
