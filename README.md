@@ -55,7 +55,7 @@ themselves rather than trusting the vendor who produced it.
 > the same yourself: `npm install`, then `npm run recheck:fuji`.
 >
 > **Try it in your browser, nothing to install:**
-> **[germline try page](https://raw.githack.com/let-the-dreamers-rise/germline-avalanche/main/web/try.html)**. It runs a real
+> **[germline try page](https://germline-avalanche.vercel.app/try)**. It runs a real
 > search on your screen, then records it on Fuji from a throwaway test wallet
 > and checks every organism against the chain.
 >
