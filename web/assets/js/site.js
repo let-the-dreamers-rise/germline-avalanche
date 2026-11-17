@@ -71,6 +71,13 @@
   Site.EASE = EASE;
   Site.OUT = OUT;
 
+  // Split lines only once the web fonts are in, or the line breaks are wrong.
+  var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  var timeout = new Promise(function (resolve) { setTimeout(resolve, 1500); });
+  Site.ready = Promise.race([fontsReady, timeout]).then(function () { init(); return Site; });
+
+  function init() {
+
   // Masked line reveals on every headline marked data-split.
   Site.splitReveal = function (el, opts) {
     opts = opts || {};
@@ -140,4 +147,6 @@
   });
 
   root.classList.add("motion-ready");
+  if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
 })();

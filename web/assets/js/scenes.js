@@ -4,6 +4,9 @@
   "use strict";
   var Site = window.Site || {};
   var gsap = window.gsap;
+  if (Site.motion && Site.ready) Site.ready.then(run); else run();
+
+  function run() {
 
   // Before vs after. Works with keyboard (it is a range input) and without GSAP.
   var compare = document.querySelector(".compare");
@@ -75,5 +78,6 @@
       scale: 1, autoAlpha: 1, ease: "none",
       scrollTrigger: { trigger: closing, start: "top bottom", end: "top 40%", scrub: 0.6 }
     });
+  }
   }
 })();

@@ -154,7 +154,7 @@ p { margin: 0; }
 .footer-links a:hover { color: var(--ink); }
 .wordmark {
   font: 700 var(--step-5)/0.8 var(--display); letter-spacing: -0.05em; margin: 48px 0 -0.08em;
-  color: transparent; -webkit-text-stroke: 1px var(--line); white-space: nowrap; user-select: none;
+  color: transparent; -webkit-text-stroke: 1px var(--faint); white-space: nowrap; user-select: none;
   display: flex; justify-content: center;
 }
 .wordmark span { display: inline-block; }

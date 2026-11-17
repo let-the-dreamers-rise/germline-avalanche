@@ -6,7 +6,10 @@
   "use strict";
   var Site = window.Site || {};
   var hero = document.querySelector(".hero");
-  if (!hero || !Site.motion) return;
+  if (!hero || !Site.motion || !Site.ready) return;
+  Site.ready.then(start);
+
+  function start() {
   var gsap = window.gsap;
   var OUT = "power3.out";
   var EASE = "power3.inOut";
@@ -96,5 +99,6 @@
       story = build();
       story.play(0);
     });
+  }
   }
 })();
