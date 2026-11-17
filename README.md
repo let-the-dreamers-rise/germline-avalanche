@@ -366,7 +366,7 @@ npx hardhat run scripts/verify.js --network zerog
 npx hardhat run scripts/status.js    --network zerog
 ```
 
-Then open `web/index.html` to see the lineage and the fitness climb. It is a
+Then open `web/viewer.html` to see the lineage and the fitness climb. It is a
 single static file with no build step; pass `?address=0x...` or edit the
 config block at the top.
 
@@ -422,6 +422,7 @@ engine/                    the reference trial and its measured fitness
 examples/                  a RAG agent and a pricing ladder
 scripts/                   preflight, deploy, found, breed, verify, status
 lib/                       chain access, genome cache, storage publication
-web/index.html             lineage viewer, single file, no build step
+web/index.html             landing page; try.html runs it in the browser
+web/viewer.html            lineage viewer, single file, no build step
 test/                      45 tests
 ```

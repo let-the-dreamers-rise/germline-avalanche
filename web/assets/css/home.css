@@ -1,8 +1,5 @@
 /* Landing page sections. */
 
-.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.btn-primary { background: var(--ink); color: var(--base); border-color: var(--ink); font-weight: 600; }
-.btn-primary:hover { background: #fff; border-color: #fff; }
 .fine { margin-top: 16px; color: var(--faint); font-size: var(--step--1); }
 
 /* 1. Hero */
@@ -82,7 +79,8 @@
   .compare-pane { grid-area: auto; min-height: 0; }
   .compare-after { clip-path: none; }
   .compare-before > *, .compare-after > * { max-width: none; margin-left: 0; }
-  .compare-handle, .compare-range { display: none; }
+  .compare-handle, .compare-range, .drag-hint { display: none; }
+  .pane-config { font-size: 0.8rem; white-space: pre-wrap; }
 }
 
 /* 4. Steps: pinned stage on wide screens, a stacked list on narrow ones */

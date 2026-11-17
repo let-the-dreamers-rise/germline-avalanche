@@ -1,504 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Germline on Avalanche</title>
+<meta name="description" content="Germline is live and source-verified on Avalanche Fuji. An honest child verifies GENUINE; a forged one is caught as FORGED, re-checked on every push." />
+<meta name="theme-color" content="#0b0c0f" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e84142'/%3E%3Cpath d='M8 3v10M5 6h6M5 10h6' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E" />
+<script>
+  document.documentElement.classList.add("js");
+  setTimeout(function () { var r = document.documentElement; if (!r.classList.contains("motion-ready")) r.classList.add("no-motion"); }, 2500);
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
-<style>
-  /* ---- tokens ----------------------------------------------------------
-     Carried over from web/index.html: a lab instrument reading out a
-     measurement, not a product dashboard. Flat surfaces, hairlines instead
-     of cards, no shadows, and colour spent only where it carries meaning.
-     The one change for Avalanche is the accent, which moves from 0G gold to
-     Avalanche red -- and stays structural: the lineage spine, the rules, the
-     figures that matter. Pass and fail get their own register, because a red
-     that means "brand" cannot also mean "broken". */
-  :root {
-    --paper:      #edeff2;
-    --panel:      #ffffff;
-    --panel-2:    #f6f7f9;
-    --ink:        #14171c;
-    --ink-dim:    #5a6270;
-    --ink-faint:  #8b939f;
-    --rule:       #d2d7de;
-    --rule-soft:  #e2e6ea;
-    --accent:     #e84142;
-    --accent-ink: #b32b2c;
-    --accent-wash:#fbe9e9;
-    --ok:         #157f5b;
-    --ok-wash:    #e4f2ec;
-    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
-    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", ui-sans-serif, Roboto, Helvetica, Arial, sans-serif;
-    --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", -apple-system, "Segoe UI", ui-sans-serif, Arial, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --paper:      #0e1013;
-      --panel:      #16191f;
-      --panel-2:    #1b1f26;
-      --ink:        #e8eaee;
-      --ink-dim:    #99a1ad;
-      --ink-faint:  #626a77;
-      --rule:       #2a2f38;
-      --rule-soft:  #21252c;
-      --accent:     #ff5b5c;
-      --accent-ink: #ff8a8b;
-      --accent-wash:#2a1618;
-      --ok:         #45b98c;
-      --ok-wash:    #12241d;
-    }
-  }
-  :root[data-theme="dark"] {
-    --paper:      #0e1013;
-    --panel:      #16191f;
-    --panel-2:    #1b1f26;
-    --ink:        #e8eaee;
-    --ink-dim:    #99a1ad;
-    --ink-faint:  #626a77;
-    --rule:       #2a2f38;
-    --rule-soft:  #21252c;
-    --accent:     #ff5b5c;
-    --accent-ink: #ff8a8b;
-    --accent-wash:#2a1618;
-    --ok:         #45b98c;
-    --ok-wash:    #12241d;
-  }
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/base.css" />
+<link rel="stylesheet" href="assets/css/verdict.css" />
+<link rel="stylesheet" href="assets/css/avalanche.css" />
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/verdict.js"></script>
+<script defer src="assets/js/avalanche.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
 
-  * { box-sizing: border-box; }
-  body {
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 15.5px;
-    line-height: 1.62;
-    -webkit-font-smoothing: antialiased;
-  }
-  .sheet { max-width: 940px; margin: 0 auto; padding: 0 28px 96px; }
-  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 2px; }
-  a:focus-visible, .chip:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px;
-  }
-  code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Germline home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="4.5" r="2.5" fill="#e84142"/><circle cx="5" cy="19" r="2.5" stroke="#f1f2f4" stroke-width="1.6"/><circle cx="19" cy="19" r="2.5" stroke="#f1f2f4" stroke-width="1.6"/><path d="M12 7v4.5M12 11.5 6.2 16.8M12 11.5l5.8 5.3" stroke="#f1f2f4" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Germline
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="try.html">Try it</a></li>
+      <li><a href="avalanche.html" aria-current="page">On Avalanche</a></li>
+      <li><a href="explainer.html">20-second version</a></li>
+      <li><a href="viewer.html">Lineage viewer</a></li>
+      <li><a href="https://github.com/let-the-dreamers-rise/germline-avalanche">GitHub</a></li>
+    </ul>
+  </div>
+</header>
 
-  .eyebrow {
-    font-family: var(--cond); font-weight: 700; font-size: 11.5px;
-    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint);
-  }
-
-  /* ---- masthead --------------------------------------------------------- */
-  header.mast { padding: 56px 0 0; }
-  .wordmark { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
-  .wordmark h1 {
-    font-family: var(--cond); font-weight: 700; font-size: 30px; margin: 0;
-    letter-spacing: 0.16em; text-transform: uppercase;
-  }
-  .wordmark .on {
-    font-family: var(--cond); font-weight: 600; font-size: 13px;
-    letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
-    border-left: 1px solid var(--rule); padding-left: 16px;
-  }
-  .mast .rule { height: 3px; background: var(--accent); margin: 18px 0 0; }
-  .mast .rule + .rule { height: 1px; background: var(--rule); margin-top: 2px; }
-
-  .thesis {
-    font-size: 21px; line-height: 1.5; margin: 30px 0 0; max-width: 30em;
-    text-wrap: balance; font-weight: 400;
-  }
-  .thesis b { font-weight: 600; }
-  .sub { color: var(--ink-dim); margin: 14px 0 0; max-width: 34em; }
-
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; }
-  .chip {
-    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.02em;
-    border: 1px solid var(--rule); background: var(--panel);
-    padding: 5px 10px; color: var(--ink-dim); text-decoration: none;
-  }
-  .chip b { color: var(--ink); font-weight: 600; }
-
-  /* ---- sections --------------------------------------------------------- */
-  section { margin: 64px 0 0; }
-  section > .eyebrow { display: block; margin-bottom: 10px; }
-  h2 {
-    font-family: var(--cond); font-weight: 700; font-size: 25px; margin: 0 0 16px;
-    letter-spacing: 0.01em; text-wrap: balance;
-  }
-  p { margin: 0 0 14px; max-width: 68ch; }
-  p:last-child { margin-bottom: 0; }
-
-  /* ---- the mechanism: commit then reveal -------------------------------- */
-  .steps { display: grid; gap: 0; margin: 26px 0 0; border: 1px solid var(--rule); background: var(--panel); }
-  @media (min-width: 760px) { .steps { grid-template-columns: 1fr 1fr; } }
-  .step { padding: 22px 24px 24px; }
-  .step + .step { border-top: 1px solid var(--rule); }
-  @media (min-width: 760px) {
-    .step + .step { border-top: 0; border-left: 1px solid var(--rule); }
-  }
-  .step .n {
-    font-family: var(--mono); font-size: 11px; color: var(--accent);
-    letter-spacing: 0.1em; display: block; margin-bottom: 6px;
-  }
-  .step h3 {
-    font-family: var(--mono); font-weight: 600; font-size: 15px; margin: 0 0 4px;
-  }
-  .step .when { font-size: 13px; color: var(--ink-faint); margin: 0 0 16px; }
-  .step p { font-size: 14px; color: var(--ink-dim); margin: 14px 0 0; max-width: none; }
-
-  .field {
-    font-family: var(--mono); font-size: 12.5px; border: 1px solid var(--rule-soft);
-    background: var(--panel-2); padding: 10px 12px; display: flex; gap: 10px;
-    align-items: baseline; justify-content: space-between;
-  }
-  .field .k { color: var(--ink-faint); }
-  .field .v { color: var(--ink); }
-  /* The block hash does not exist when the breeder commits. Hatching is the
-     honest rendering of a value that is not merely hidden but unwritten. */
-  .field.unresolved { border-style: dashed; }
-  .field.unresolved .v {
-    color: var(--ink-faint);
-    background-image: repeating-linear-gradient(
-      -45deg, var(--rule) 0 1px, transparent 1px 6px);
-    padding: 0 8px; user-select: none;
-  }
-  .field.resolved { border-color: var(--accent); }
-  .field.resolved .v { color: var(--accent-ink); font-weight: 600; }
-
-  .seed {
-    margin: 26px 0 0; border-left: 3px solid var(--accent); background: var(--panel);
-    border-top: 1px solid var(--rule); border-right: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule); padding: 18px 22px;
-    overflow-x: auto;
-  }
-  .seed code { font-size: 13.5px; white-space: pre; display: block; }
-  .seed .cap { font-size: 13px; color: var(--ink-dim); margin: 12px 0 0; max-width: 60ch; }
-
-  /* ---- verification: both outcomes are the feature ---------------------- */
-  .outcomes { display: grid; gap: 14px; margin: 24px 0 0; }
-  @media (min-width: 700px) { .outcomes { grid-template-columns: 1fr 1fr; } }
-  .outcome { border: 1px solid var(--rule); background: var(--panel); padding: 20px 22px; }
-  .outcome .verdict {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em;
-    text-transform: uppercase; color: var(--ok); background: var(--ok-wash);
-    border: 1px solid var(--ok); padding: 3px 9px; margin-bottom: 14px;
-  }
-  .outcome h3 { font-size: 15.5px; margin: 0 0 8px; font-weight: 600; }
-  .outcome p { font-size: 14px; color: var(--ink-dim); margin: 0; max-width: none; }
-  .outcome .test {
-    font-family: var(--mono); font-size: 12px; color: var(--ink-faint);
-    margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--rule-soft);
-    word-break: break-word;
-  }
-
-  /* ---- tables ----------------------------------------------------------- */
-  .tablewrap { overflow-x: auto; margin: 24px 0 0; border: 1px solid var(--rule); background: var(--panel); }
-  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
-  th, td {
-    text-align: right; padding: 11px 16px; white-space: nowrap;
-    font-family: var(--mono); font-variant-numeric: tabular-nums;
-    border-bottom: 1px solid var(--rule-soft);
-  }
-  th {
-    font-family: var(--cond); font-weight: 700; font-size: 11px;
-    letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint);
-    border-bottom: 1px solid var(--rule);
-  }
-  th:first-child, td:first-child { text-align: left; }
-  tbody tr:last-child td { border-bottom: 0; }
-  td.win { color: var(--accent-ink); font-weight: 600; }
-  td.lose { color: var(--ink-faint); }
-
-  /* ---- status list ------------------------------------------------------ */
-  .status { margin: 24px 0 0; border-top: 1px solid var(--rule); }
-  .row {
-    display: flex; gap: 18px; align-items: baseline; justify-content: space-between;
-    padding: 13px 0; border-bottom: 1px solid var(--rule-soft); flex-wrap: wrap;
-  }
-  .row .what { font-size: 14.5px; }
-  .row .val { font-family: var(--mono); font-size: 13px; color: var(--ink-dim); text-align: right; }
-  .row .val.done { color: var(--ok); }
-  .row .val.pending { color: var(--ink-faint); }
-
-  /* ---- command ---------------------------------------------------------- */
-  pre.cmd {
-    margin: 20px 0 0; background: var(--panel); border: 1px solid var(--rule);
-    border-left: 3px solid var(--accent); padding: 16px 20px; overflow-x: auto;
-    font-family: var(--mono); font-size: 13px; line-height: 1.7;
-  }
-  pre.cmd .c { color: var(--ink-faint); }
-
-  footer {
-    margin: 72px 0 0; padding-top: 22px; border-top: 1px solid var(--rule);
-    display: flex; gap: 20px; flex-wrap: wrap; justify-content: space-between;
-    font-size: 13px; color: var(--ink-faint);
-  }
-  footer .links { display: flex; gap: 18px; flex-wrap: wrap; }
-</style>
-
-<div class="sheet">
-
-  <header class="mast">
-    <div class="wordmark">
-      <h1>Germline</h1>
-      <span class="on">Avalanche C&#8209;Chain</span>
+<main id="main">
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">Germline on Avalanche C-Chain</p>
+    <h1 data-split>Live on Fuji. The forgery is caught on chain.</h1>
+    <p class="lede">Your agent has twenty knobs and you tuned three. Germline turns the rest using the eval you already have, and hands back a result with <b>a lineage anyone can verify without trusting you</b>.</p>
+    <div class="facts" data-reveal data-stagger>
+      <a class="fact" href="https://testnet.snowtrace.io/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25"><span class="k">Contract &middot; source verified</span><span class="v">0xA0448Cd6&hellip;5F7b25</span></a>
+      <a class="fact" href="https://testnet.snowtrace.io/tx/0x0fff24762d02e1bdd3d0053d038a995017e2e61ea14c9633f0d22c7cad8d3de9"><span class="k">Deployed &middot; block 61187186</span><span class="v">0x0fff2476&hellip;3de9</span></a>
+      <a class="fact" href="https://github.com/let-the-dreamers-rise/germline-avalanche/actions/workflows/fuji.yml"><span class="k">Re-checked on every push</span><span class="v">public CI, no key</span></a>
+      <div class="fact"><span class="k">Network</span><span class="v">Fuji &middot; 43113</span></div>
     </div>
-    <div class="rule"></div>
-    <div class="rule"></div>
+  </div>
+</section>
 
-    <p class="thesis">
-      Your agent has twenty knobs and you tuned three. Germline turns the rest
-      using the eval you already have &mdash; and hands back a result with
-      <b>a lineage anyone can verify without trusting you</b>.
-    </p>
-    <p class="sub">
-      A child configuration is derived, not asserted. Its mutation seed comes
-      from a block that has not been mined yet, so the breeder cannot go
-      looking for a flattering result.
-    </p>
-
-    <div class="chips">
-      <span class="chip"><b>Fuji</b> &middot; 43113</span>
-      <span class="chip"><b>C-Chain</b> &middot; 43114</span>
-      <span class="chip"><b>53</b> tests passing</span>
-      <span class="chip"><b>53</b> against a Fuji fork</span>
-      <span class="chip">EVM target <b>paris</b></span>
+<section class="section" id="record">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">The live record</p>
+      <h2 data-split>Three organisms, nine transactions, two verdicts.</h2>
+      <p class="lede" data-reveal>Every link below is a real transaction on Avalanche Fuji. The same receipt is in the repo as <code>deployments/fuji-e2e.json</code>.</p>
     </div>
-  </header>
+    <ol class="ledger" data-reveal data-stagger>
+      <li class="entry">
+        <div class="entry-head"><span class="entry-id">#1 founder</span><span class="entry-score">3148 bps</span></div>
+        <p class="entry-genes">action-only</p>
+        <p class="entry-tx"><a href="https://testnet.snowtrace.io/tx/0xfab44054ae42b1139a53adf794b78342494f169c203612c4fa334ff19ce63ac1">seedFounder</a><a href="https://testnet.snowtrace.io/tx/0x5ae608fdeb93cc0b0e6983db7a102a9d0d70bf633262ec46e28ed0aa92237da0">attestFitness</a></p>
+      </li>
+      <li class="entry">
+        <div class="entry-head"><span class="entry-id">#2 child of #1</span><span class="entry-score">3821 bps</span></div>
+        <p class="entry-genes">colour + size <span class="up">+673</span></p>
+        <p class="entry-tx"><a href="https://testnet.snowtrace.io/tx/0xdddd9ecd080015d431a9387ccfb28d17e40cdb13672e1dce7ffd273c37ff4247">requestSpawn</a><a href="https://testnet.snowtrace.io/tx/0x3895bd8673e34cd8305cc8570a2c95a28c63762c691f6f3c62d1148fdaee338a">spawn</a><a href="https://testnet.snowtrace.io/tx/0x097d6c07ce6d445ccc59b92ef69760c44230be75c64dac6dd91bd0f51a629c30">attestFitness</a></p>
+        <span class="chip genuine">GENUINE</span>
+      </li>
+      <li class="entry entry-forged">
+        <div class="entry-head"><span class="entry-id">#3 child of #1, forged</span><span class="entry-score">4602 bps</span></div>
+        <p class="entry-genes">colour + size + ring + momentum, a genome its seed could not produce</p>
+        <p class="entry-tx"><a href="https://testnet.snowtrace.io/tx/0x6dde95396c9dac6f0b3aef6deb22e19e041114ba0be1b44fdc62117db5deeb01">requestSpawn</a><a href="https://testnet.snowtrace.io/tx/0xc5a19232d52a0152981d6ead72a460bae71f1e0532052a36574e3e8091a71223">spawn</a><a href="https://testnet.snowtrace.io/tx/0xf979a1cfc6511d94104a0952149a2d6b23515d417c6e76b358c9fb34a11345fd">attestFitness</a></p>
+        <span class="chip forged">FORGED &middot; heredity</span>
+      </li>
+    </ol>
+    <p class="fine">The forged reveal transaction succeeds on chain by design. What fails is the re-derivation anyone can run afterwards.</p>
+  </div>
+</section>
 
-  <section>
-    <span class="eyebrow">The mechanism</span>
-    <h2>Reproduction is two transactions, and that is the point</h2>
-    <p>
-      Breeding in one step would let whoever runs it try seeds until one
-      produced a configuration they liked. So it takes two, with a block
-      boundary in between.
-    </p>
+<section class="section" id="verify">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Verification</p>
+      <h2 data-split>Both outcomes are the feature working.</h2>
+      <p class="lede" data-reveal>A verifier that only ever says yes has told you nothing. Run the same four checks on each child.</p>
+    </div>
+    <div data-verdict-machine></div>
+    <noscript><p class="lede">Honest child #2: GENUINE. Forged child #3: FORGED, heredity failed. Run <code>npm run recheck:fuji</code> to check both yourself.</p></noscript>
+  </div>
+</section>
 
-    <div class="steps">
-      <div class="step">
-        <span class="n">TX 1</span>
+<section class="section" id="mechanism">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">The mechanism</p>
+      <h2 data-split>Reproduction is two transactions, and that is the point.</h2>
+      <p class="lede" data-reveal>Breeding in one step would let whoever runs it try seeds until one produced a configuration they liked. So it takes two, with a block boundary in between.</p>
+    </div>
+    <div class="txs" data-reveal data-stagger>
+      <article class="card tx">
+        <span class="tx-n">TX 1</span>
         <h3>requestSpawn(parentId)</h3>
-        <p class="when">Commits to breeding at a future block.</p>
-        <div class="field unresolved">
-          <span class="k">blockhash(requestBlock)</span>
-          <span class="v" aria-label="does not exist yet">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </div>
-        <p>
-          The hash does not exist. Nothing about the child can be computed,
-          predicted, or shopped for &mdash; not by the breeder, not by anyone.
-        </p>
-      </div>
-      <div class="step">
-        <span class="n">TX 2</span>
+        <p class="dim">Commits to breeding at a future block.</p>
+        <div class="field"><span class="k">blockhash(61187418)</span><span class="v pending">does not exist yet</span></div>
+        <p class="dim">Nothing about the child can be computed, predicted or shopped for, not by the breeder and not by anyone.</p>
+      </article>
+      <article class="card tx">
+        <span class="tx-n">TX 2</span>
         <h3>spawn(&hellip;)</h3>
-        <p class="when">Reveals the child, afterwards.</p>
-        <div class="field resolved">
-          <span class="k">blockhash(requestBlock)</span>
-          <span class="v">0x7c2f&hellip;a91e</span>
-        </div>
-        <p>
-          Now the seed is fixed and the only remaining choices are to accept
-          the child or abandon it &mdash; and abandoning it is recorded too.
-        </p>
-      </div>
+        <p class="dim">Reveals the child, afterwards.</p>
+        <div class="field"><span class="k">blockhash(61187418)</span><span class="v resolved" data-resolve>0xc47a8833&hellip;2417</span></div>
+        <p class="dim">Now the seed is fixed. The only remaining choices are to accept the child or abandon it, and abandoning it is recorded too.</p>
+      </article>
     </div>
+    <pre class="code seed" data-reveal>seed = keccak256(parentGenomeRoot, blockhash(requestBlock), parentId, ordinal)
+<span class="c">// child #2: blockhash(61187418), parent #1, ordinal 0  -&gt;  0x71cb2169&hellip;ef78</span></pre>
+  </div>
+</section>
 
-    <div class="seed">
-      <code>seed = keccak256(parentGenomeRoot, blockhash(requestBlock), parentId, ordinal)</code>
-      <p class="cap">
-        Anyone holding the parent re-runs the mutation offline and compares it
-        against the child root on chain. A forged lineage fails arithmetic
-        rather than failing to be believed.
-      </p>
+<section class="section" id="benchmark">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">The benchmark we would rather you saw from us</p>
+      <h2 data-split>Random sampling beats our own search, and we ship the control.</h2>
     </div>
-  </section>
-
-  <section>
-    <span class="eyebrow">Verification</span>
-    <h2>Both outcomes are the feature working</h2>
-    <p>
-      A verifier that only ever says yes has told you nothing. These two tests
-      run on every commit, and against a fork of Avalanche Fuji.
-    </p>
-    <div class="outcomes">
-      <div class="outcome">
-        <span class="verdict">Accepted</span>
-        <h3>An honest child</h3>
-        <p>
-          Bred through the real two-transaction path, re-derived from its
-          parent and seed, and matched against what the chain recorded.
-        </p>
-        <p class="test">breeds one honest child that verify.js accepts as genuine</p>
-      </div>
-      <div class="outcome">
-        <span class="verdict">Refused</span>
-        <h3>A forged child</h3>
-        <p>
-          Same parent, same seed, a configuration that seed could not have
-          produced. The root disagrees, so it is rejected &mdash; no judgement
-          call, no trust involved.
-        </p>
-        <p class="test">rejects a forged child whose genome root does not match its recorded seed</p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <span class="eyebrow">The benchmark we would rather you saw from us</span>
-    <h2>Random sampling beats our own search, and we ship the control</h2>
-    <p>
-      An earlier version of this project claimed the search captured 80% of the
-      available headroom for 21% of the budget. Both numbers were true and the
-      claim was still wrong, because nobody had asked what random sampling does
-      with the same budget.
-    </p>
-    <div class="tablewrap">
+    <div class="bench" data-reveal>
       <table>
-        <thead>
-          <tr>
-            <th scope="col">Landscape</th>
-            <th scope="col">Space</th>
-            <th scope="col">Budget</th>
-            <th scope="col">Sampled</th>
-            <th scope="col">Evolution</th>
-            <th scope="col">Random</th>
-            <th scope="col">Winner</th>
-          </tr>
-        </thead>
+        <thead><tr><th scope="col">Landscape</th><th scope="col">Space</th><th scope="col">Budget</th><th scope="col">Sampled</th><th scope="col">Evolution</th><th scope="col">Random</th><th scope="col">Winner</th></tr></thead>
         <tbody>
-          <tr>
-            <td>Synthetic, smooth</td><td>216</td><td>45</td><td>20.83%</td>
-            <td class="lose">7821</td><td>9159</td><td class="win">Random</td>
-          </tr>
-          <tr>
-            <td>Synthetic, rugged</td><td>216</td><td>45</td><td>20.83%</td>
-            <td class="lose">5225</td><td>9500</td><td class="win">Random</td>
-          </tr>
-          <tr>
-            <td>ARC corpus, real data</td><td>6144</td><td>38</td><td>0.62%</td>
-            <td>4865</td><td class="lose">4765</td><td class="win">Evolution</td>
-          </tr>
+          <tr><td>Synthetic, smooth</td><td>216</td><td>45</td><td>20.83%</td><td class="lose">7821</td><td>9159</td><td class="win">Random</td></tr>
+          <tr><td>Synthetic, rugged</td><td>216</td><td>45</td><td>20.83%</td><td class="lose">5225</td><td>9500</td><td class="win">Random</td></tr>
+          <tr><td>ARC corpus, real data</td><td>6144</td><td>38</td><td>0.62%</td><td>4865</td><td class="lose">4765</td><td class="win">Evolution</td></tr>
         </tbody>
       </table>
     </div>
-    <p style="margin-top:18px">
-      The deciding column is <b>sampled</b>, not the size of the space. When you
-      can afford a fifth of every possible configuration, drawing at random is
-      close to optimal and no selection machinery earns its keep. Under one
-      percent &mdash; which is what a real configuration space looks like, and
-      the only row above built on recorded data &mdash; selection is ahead.
-    </p>
-    <p>
-      So Germline does not sell a better optimiser. It sells a verifiable record
-      of whatever search you ran, and <code>search()</code> ships the random
-      control switched on, reporting <code>run.verdict.winner</code>. If random
-      wins on your space, use it and keep the lineage.
-    </p>
-  </section>
+    <p class="lede" data-reveal>The deciding column is <b>sampled</b>, not the size of the space. Under one percent, which is what a real configuration space looks like, selection is ahead. So Germline sells a verifiable record of whatever search you ran, and <code>search()</code> reports <code>run.verdict.winner</code> with the random control switched on.</p>
+  </div>
+</section>
 
-  <section>
-    <span class="eyebrow">Why this chain</span>
-    <h2>Two reasons specific to this mechanism</h2>
-    <p>
-      <b>Finality is dead time here.</b> The wait between commit and reveal
-      exists for a security reason that cannot be optimised away &mdash; the
-      seed must not exist when the breeder commits. That wait is time a user
-      spends watching a spinner. Sub-second finality turns a security
-      requirement into a non-issue; on a slow chain this mechanism is genuinely
-      unpleasant to use.
-    </p>
-    <p>
-      <b>A per-customer L1 is the regulated-deployment story.</b> Provenance
-      sells to teams whose own customers ask which version produced a given
-      output &mdash; finance, health, anything audited. Those buyers frequently
-      cannot put anything on a public chain. An Avalanche L1 lets a customer run
-      the same registry, the same contract and the same verifier on a chain they
-      control. That product shape does not exist on a monolithic chain.
-    </p>
-  </section>
-
-  <section>
-    <span class="eyebrow">Portability</span>
-    <h2>The storage dependency was removed, not replaced</h2>
-    <p>
-      The chain carries a root; the bytes have to live somewhere. On 0G that was
-      0G Storage. The obvious way to leave is to depend on some other blob
-      service instead &mdash; which trades one dependency for another and calls
-      it portability.
-    </p>
-    <p>
-      But a root is <code>keccak256</code> over canonical bytes, computed here,
-      from bytes we hold. A reader can check what they were handed. So the store
-      does not need to be trusted, decentralised, or even well behaved: it needs
-      to return the bytes, and if it returns different ones the hash says so and
-      the read is refused. A plain directory served over HTTP is a complete
-      answer.
-    </p>
-    <pre class="cmd">GERMLINE_STORE=fs     <span class="c"># files on disk, no dependencies (default)</span>
-GERMLINE_STORE=http   <span class="c"># any static host; reads are verified</span>
-GERMLINE_STORE=0g     <span class="c"># 0G Storage, still available</span></pre>
-  </section>
-
-  <section>
-    <span class="eyebrow">Status</span>
-    <h2>What is built, and what is not</h2>
-    <div class="status">
-      <div class="row">
-        <span class="what">Contract, tests, SDK, verifier</span>
-        <span class="val done">53 passing</span>
-      </div>
-      <div class="row">
-        <span class="what">Full suite against an Avalanche Fuji fork</span>
-        <span class="val done">53 passing</span>
-      </div>
-      <div class="row">
-        <span class="what">Content-addressed store, reads verified</span>
-        <span class="val done">built &amp; tested</span>
-      </div>
-      <div class="row">
-        <span class="what">Networks, Snowtrace links, deploy scripts</span>
-        <span class="val done">wired</span>
-      </div>
-      <div class="row">
-        <span class="what">Registry live on 0G mainnet since 3 Sep 2026</span>
-        <span class="val">0xA0448C&hellip;5F7b25</span>
-      </div>
-      <div class="row">
-        <span class="what">Live on Fuji, verified on Snowtrace, forged child rejected on chain</span>
-        <span class="val done"><a href="https://testnet.snowtrace.io/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25">0xA0448C&hellip;5F7b25</a></span>
-      </div>
-      <div class="row">
-        <span class="what">Deployed to C-Chain mainnet</span>
-        <span class="val pending">next</span>
-      </div>
-      <div class="row">
-        <span class="what">An outside team running a real eval through it</span>
-        <span class="val pending">not yet</span>
-      </div>
+<section class="section" id="why">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Why this chain</p>
+      <h2 data-split>Two reasons specific to this mechanism.</h2>
     </div>
-  </section>
+    <div class="why" data-reveal data-stagger>
+      <article class="card"><h3>Finality is dead time here</h3><p class="dim">The wait between commit and reveal exists for a security reason that cannot be optimised away: the seed must not exist when the breeder commits. Sub-second finality turns that requirement into a non-issue.</p></article>
+      <article class="card"><h3>A per-customer L1 is the regulated-deployment story</h3><p class="dim">Teams in finance, health or anything audited often cannot use a public chain. An Avalanche L1 lets a customer run the same registry, contract and verifier on a chain they control.</p></article>
+      <article class="card"><h3>The storage dependency was removed</h3><p class="dim">A root is <code>keccak256</code> over canonical bytes, so the store does not need to be trusted. A plain directory over HTTP is a complete answer, and every read is checked.</p></article>
+    </div>
+  </div>
+</section>
 
-  <section>
-    <span class="eyebrow">Check it yourself</span>
-    <h2>The Avalanche claim, in one command</h2>
-    <p>
-      The heredity is seeded from <code>blockhash</code>. A chain that served
-      historical block hashes differently would break commit-reveal silently
-      &mdash; every child seeded from zero, every lineage verifying against a
-      constant, and a green test suite the whole time. So it is checked against
-      a real fork rather than asserted.
-    </p>
-    <pre class="cmd">git clone https://github.com/let-the-dreamers-rise/germline
-cd germline &amp;&amp; npm install
-FORK_RPC=https://api.avax-test.network/ext/bc/C/rpc npx hardhat test</pre>
-  </section>
+<section class="section" id="status">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Status</p>
+      <h2 data-split>What is built, and what is not.</h2>
+    </div>
+    <ul class="status" data-reveal data-stagger>
+      <li><span>Contract, SDK, verifier and tests</span><span class="done">68 passing</span></li>
+      <li><span>Live on Fuji, source verified on Snowtrace, forged child caught</span><span class="done">done</span></li>
+      <li><span>Both verdicts re-checked against live Fuji on every push</span><span class="done">public CI</span></li>
+      <li><span>Try it in a browser or with one command, no wallet</span><span class="done"><a href="try.html">try it</a></span></li>
+      <li><span>Content-addressed store, reads verified</span><span class="done">built and tested</span></li>
+      <li><span>C-Chain mainnet. Measured on Fuji: deploy 2,361,905 gas, full lifecycle 3,447,381 gas</span><span class="next">next</span></li>
+      <li><span>An outside team running a real eval through it</span><span class="next">not yet</span></li>
+    </ul>
+  </div>
+</section>
 
-  <footer>
-    <span>Germline &middot; verifiable heredity for AI configuration</span>
-    <span class="links">
-      <a href="https://github.com/let-the-dreamers-rise/germline">Repository</a>
-      <a href="https://chainscan.0g.ai/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25">0G registry</a>
-      <a href="index.html">Lineage viewer</a>
-    </span>
-  </footer>
+<section class="section" id="check">
+  <div class="wrap check">
+    <p class="eyebrow">Check it yourself</p>
+    <h2 data-split>The Avalanche claim, in one command.</h2>
+    <p class="lede">No key, no gas. It reads the deployed contract and re-derives both children from public chain data.</p>
+<pre class="code" data-reveal><button class="code-copy" type="button" data-copy="git clone https://github.com/let-the-dreamers-rise/germline-avalanche
+cd germline-avalanche
+npm install
+npm run recheck:fuji"><span class="copy-label">Copy</span></button><span class="k">$</span> git clone https://github.com/let-the-dreamers-rise/germline-avalanche
+<span class="k">$</span> cd germline-avalanche &amp;&amp; npm install
+<span class="k">$</span> npm run recheck:fuji
 
-</div>
+honest child #2: <span class="s">GENUINE</span>
+forged child #3: <span class="k">FORGED</span> (heredity)
+<span class="s">RE-CHECK PASSED</span></pre>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <p>Germline &middot; verifiable heredity for AI configuration &middot; MIT</p>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="try.html">Try it</a></li>
+        <li><a href="viewer.html">Lineage viewer</a></li>
+        <li><a href="https://github.com/let-the-dreamers-rise/germline-avalanche">GitHub</a></li>
+      </ul>
+    </div>
+    <p class="wordmark" aria-hidden="true"><span>G</span><span>E</span><span>R</span><span>M</span><span>L</span><span>I</span><span>N</span><span>E</span></p>
+  </div>
+</footer>
+</body>
+</html>

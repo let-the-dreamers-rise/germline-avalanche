@@ -94,8 +94,10 @@
   // Staggered fade-up for content as it enters.
   document.querySelectorAll("[data-reveal]").forEach(function (group) {
     var items = group.hasAttribute("data-stagger") ? group.children : [group];
+    // Opacity only, never visibility: content not yet revealed must stay
+    // reachable by keyboard and screen readers.
     gsap.from(items, {
-      autoAlpha: 0, y: 28, duration: 0.8, ease: OUT, stagger: 0.09,
+      opacity: 0, y: 28, duration: 0.8, ease: OUT, stagger: 0.09,
       scrollTrigger: { trigger: group, start: "top 88%", once: true }
     });
   });

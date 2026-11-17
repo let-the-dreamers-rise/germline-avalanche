@@ -39,7 +39,7 @@
       items.forEach(function (it, k) { it.classList.toggle("is-active", k === i); });
       screens.forEach(function (s, k) {
         s.classList.toggle("is-active", k === i);
-        s.setAttribute("aria-hidden", String(k !== i));
+        s.inert = k !== i;
       });
     };
     setActive(0);
@@ -64,10 +64,10 @@
         return function () { st.kill(); gsap.set(bar, { clearProps: "transform" }); };
       });
       mm.add("(max-width: 900px)", function () {
-        screens.forEach(function (s) { s.removeAttribute("aria-hidden"); });
+        screens.forEach(function (s) { s.inert = false; });
       });
     } else {
-      screens.forEach(function (s) { s.removeAttribute("aria-hidden"); s.classList.add("is-active"); });
+      screens.forEach(function (s) { s.inert = false; s.classList.add("is-active"); });
     }
   }
 
