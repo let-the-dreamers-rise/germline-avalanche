@@ -37,7 +37,7 @@
       tx: "0xc5a19232d52a0152981d6ead72a460bae71f1e0532052a36574e3e8091a71223",
       verdict: "FORGED",
       checks: [
-        ["Heredity", false, "seed re-derives ring:UDLR 0xbe57…93b1, chain holds 0x253e…5f5c"],
+        ["Heredity", false, "seed re-derives ring:UDLR 0xbe57…93b1, chain holds 0x253e…df5c"],
         ["Seed", true, "keccak(parent root, blockhash 61187439, #1, ordinal 1) = 0x0c84…993a"],
         ["Score", true, "attested 4602, re-measured 4602"],
         ["Evidence", true, "evidence root matches the transcript"]
