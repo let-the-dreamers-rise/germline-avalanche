@@ -34,8 +34,8 @@
     var s = { v: from };
     return gsap.fromTo(s, { v: from }, {
       v: to, duration: 1.1, ease: "power2.out",
-      onStart: function () { el.textContent = String(from); },
-      onUpdate: function () { el.textContent = String(Math.round(s.v)); }
+      onStart: function () { el.textContent = (from / 100).toFixed(1); },
+      onUpdate: function () { el.textContent = (s.v / 100).toFixed(1); }
     });
   }
 

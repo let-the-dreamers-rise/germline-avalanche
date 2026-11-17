@@ -59,7 +59,7 @@
   <section id="local">
     <span class="eyebrow">Step 1 &middot; no wallet, nothing to install</span>
     <h2>Run a search in your browser</h2>
-    <p>Pick a system to tune. Germline starts from what the team runs today, breeds variations, and keeps the ones that score better.</p>
+    <p>Pick a system to tune, then press the button. Germline starts from what the team runs today, tries variations, and keeps the ones that score better.</p>
     <div class="choices" role="radiogroup" aria-label="Example to tune">
       <label class="choice"><input type="radio" name="trial" value="supportAgent" checked />
         <div><b>Support agent</b><span>Four RAG settings: retrieval depth, reranking, temperature and tool policy. 216 combinations.</span></div></label>
@@ -70,6 +70,7 @@
       <button id="run-local">Run the search</button>
       <span class="note" id="local-status"></span>
     </div>
+    <p class="hint">Takes about 20 seconds. Everything runs in this page; nothing is sent anywhere.</p>
     <div id="local-out" hidden>
       <div class="result">
         <div><span class="eyebrow">Started at</span><span class="big" id="l-start"></span><span class="note" id="l-start-cfg"></span></div>
@@ -92,8 +93,16 @@
 
   <!-- 2. on chain -->
   <section id="chain">
-    <span class="eyebrow">Step 2 &middot; Avalanche Fuji test network, free</span>
+    <span class="eyebrow">Step 2 &middot; optional &middot; Avalanche Fuji test network, free</span>
     <h2>Record it on chain and verify it</h2>
+    <div class="plain">
+      <p><b>In plain words:</b> step 1 showed you a better configuration, but you only have this page&rsquo;s word for how it was found. Step 2 writes every attempt to a public test blockchain, then checks each one, so anyone can confirm it.</p>
+      <ul>
+        <li>Uses <b>test money with no real value</b>. Nothing to buy.</li>
+        <li>Three steps below: see your test wallet, add free test AVAX, press <b>Record on Fuji</b>.</li>
+        <li>Takes two or three minutes. Keep this tab open.</li>
+      </ul>
+    </div>
     <p>Every configuration becomes an on-chain record of its parent and its score. Each child is bred by <b>commit-reveal</b>: you commit first, and the random seed comes from the hash of a block that did not exist yet, so nobody can pick their own mutation. At the end, the page re-derives every child from its parent and that seed.</p>
 
     <ol class="steps-list">
@@ -108,7 +117,7 @@
       </li>
       <li>
         <h3>Give it some test AVAX</h3>
-        <p class="note">About 0.1 test AVAX covers a run. It has no real value.</p>
+        <p class="note">About 0.1 test AVAX covers a run. It has no real value. Easiest: press <b>Copy address</b>, open the faucet, paste it there and request Fuji C-Chain AVAX. This page notices when it arrives.</p>
         <div class="row">
           <button id="fund-wallet" class="secondary">Send 0.1 test AVAX from MetaMask or Core</button>
           <button id="copy-address" class="secondary">Copy address</button>

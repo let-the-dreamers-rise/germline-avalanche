@@ -14,10 +14,10 @@
       tx: "0x3895bd8673e34cd8305cc8570a2c95a28c63762c691f6f3c62d1148fdaee338a",
       verdict: "GENUINE",
       checks: [
-        ["Heredity", true, "seed re-derives 0x454f…8eee, chain holds 0x454f…8eee"],
-        ["Seed", true, "keccak(parent root, blockhash 61187418, #1, ordinal 0) = 0x71cb…ef78"],
-        ["Score", true, "attested 3821, re-measured 3821"],
-        ["Evidence", true, "evidence root matches the transcript"]
+        ["Parent match", true, "Re-breeding #1 with its seed gives exactly this child (0x454f…8eee)."],
+        ["Fair seed", true, "The seed came from block 61187418, which did not exist when breeding was requested."],
+        ["Score", true, "Claimed 38.2%. Re-measured: 38.2%."],
+        ["Evidence", true, "The recorded evidence matches what was published."]
       ]
     },
     3: {
@@ -26,10 +26,10 @@
       tx: "0xc5a19232d52a0152981d6ead72a460bae71f1e0532052a36574e3e8091a71223",
       verdict: "FORGED",
       checks: [
-        ["Heredity", false, "seed re-derives ring:UDLR 0xbe57…93b1, chain holds 0x253e…5f5c"],
-        ["Seed", true, "keccak(parent root, blockhash 61187439, #1, ordinal 1) = 0x0c84…993a"],
-        ["Score", true, "attested 4602, re-measured 4602"],
-        ["Evidence", true, "evidence root matches the transcript"]
+        ["Parent match", false, "Re-breeding #1 with its seed gives a different child (0xbe57…93b1), not the one recorded (0x253e…5f5c). This child did not come from its parent."],
+        ["Fair seed", true, "The seed came from block 61187439, which did not exist when breeding was requested."],
+        ["Score", true, "Claimed 46.0%. Re-measured: 46.0%. A real score does not save a fake lineage."],
+        ["Evidence", true, "The recorded evidence matches what was published."]
       ]
     }
   };
@@ -57,7 +57,7 @@
       buttons[id] = b;
       picker.appendChild(b);
     });
-    var run = el("button", "btn btn-primary vm-run", "Run verify.js");
+    var run = el("button", "btn btn-primary vm-run", "Check it");
     run.type = "button";
     head.appendChild(picker);
     head.appendChild(run);
@@ -80,7 +80,7 @@
     function render(final) {
       var c = CHILDREN[current];
       Object.keys(buttons).forEach(function (k) { buttons[k].setAttribute("aria-pressed", String(Number(k) === current)); });
-      meta.textContent = "Parent #1 (action-only, 3148) → revealed: " + c.revealed;
+      meta.textContent = "Parent #1 (31.5%) → this child: " + c.revealed;
       list.innerHTML = "";
       c.checks.forEach(function (chk) {
         var li = el("li", "vm-check" + (final ? (chk[1] ? " pass" : " fail") : ""));
@@ -95,10 +95,10 @@
       stamp.className = "vm-stamp" + (final ? " show " + c.verdict.toLowerCase() : "");
       stamp.textContent = final ? "VERDICT: " + c.verdict : "";
       foot.innerHTML = "";
-      var a = el("a", null, "See the spawn transaction on Snowtrace");
+      var a = el("a", null, "See it on the blockchain explorer");
       a.href = TX + c.tx;
       foot.appendChild(a);
-      foot.appendChild(document.createTextNode(" · or run "));
+      foot.appendChild(document.createTextNode(" · developers can re-run it with "));
       foot.appendChild(el("code", null, "npm run recheck:fuji"));
     }
 
