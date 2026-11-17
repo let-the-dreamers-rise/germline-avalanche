@@ -44,6 +44,30 @@ function pollTries() {
 // mutationSeedFor reverts with TooEarly until the block the commitment named
 // has been mined, because until then its hash does not exist. That is the
 // mechanism working, not a failure, so it is polled rather than reported.
+// A load-balanced public RPC (Avalanche mainnet's is one) can answer the seed
+// read from a node that has the seeding block and then estimate the reveal on
+// a node that does not yet. That node sees block.number <= requestBlock and
+// the estimate reverts with TooEarly before anything is sent. It is the same
+// "not yet" as in waitForSeed, so wait and send again; any other revert is a
+// real failure and is reported with its name.
+async function revealSpawn(germline, parentId, childRoot, log) {
+  const tries = pollTries();
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const tx = await germline.spawn(parentId, childRoot);
+      return await tx.wait();
+    } catch (error) {
+      const name = revertName(error);
+      if (name !== "TooEarly" || attempt >= tries) {
+        if (name) error.message = "spawn reverted with " + name + ": " + error.message;
+        throw error;
+      }
+      log("  the RPC node is a block behind (TooEarly); retrying the reveal (attempt " + attempt + ")");
+      await sleep(pollDelay());
+    }
+  }
+}
+
 async function waitForSeed(germline, parentId, provider, log) {
   const tries = pollTries();
   for (let attempt = 1; attempt <= tries; attempt++) {
@@ -220,8 +244,7 @@ async function breed(options = {}) {
     );
   }
 
-  const spawnTx = await germline.spawn(parent.id, childRoot);
-  const spawnReceipt = await spawnTx.wait();
+  const spawnReceipt = await revealSpawn(germline, parent.id, childRoot, log);
   const spawned = eventFrom(germline, spawnReceipt, "Spawned");
   const childId = Number(spawned.id);
   log("  organism id:    " + childId);
@@ -366,4 +389,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { breed, waitForSeed };
+module.exports = { breed, waitForSeed, revealSpawn };

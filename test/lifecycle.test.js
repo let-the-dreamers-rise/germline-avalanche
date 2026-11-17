@@ -23,7 +23,7 @@ const { FOUNDER, genomeRoot } = require("../engine/genome");
 const { evaluate } = require("../engine/fitness");
 const { eventFrom } = require("../lib/chain");
 const { found } = require("../scripts/found");
-const { breed } = require("../scripts/breed");
+const { breed, revealSpawn } = require("../scripts/breed");
 const { verify } = require("../scripts/verify");
 const { forge } = require("../scripts/forge");
 const { e2e, breedAlive } = require("../scripts/e2e");
@@ -260,6 +260,35 @@ describe("lifecycle scripts", function () {
     expect(receipt.forgedChild.failed).to.include("heredity");
     const file = path.join(deploymentsDir, hre.network.name + "-e2e.json");
     expect(fs.existsSync(file)).to.equal(true);
+  });
+  it("retries a reveal that a lagging RPC node rejects as TooEarly, and nothing else", async function () {
+    process.env.GERMLINE_POLL_MS = "1";
+    try {
+      const tooEarly = () => Object.assign(new Error("execution reverted"), { revert: { name: "TooEarly" } });
+      let calls = 0;
+      const lagging = {
+        spawn: async () => {
+          calls++;
+          if (calls <= 2) throw tooEarly();
+          return { wait: async () => ({ hash: "0xabc" }) };
+        },
+      };
+      expect(await revealSpawn(lagging, 1, "0x01", noop)).to.deep.equal({ hash: "0xabc" });
+      expect(calls).to.equal(3);
+
+      calls = 0;
+      let caught = null;
+      const expired = { spawn: async () => { calls++; throw Object.assign(new Error("execution reverted"), { revert: { name: "RequestExpired" } }); } };
+      try {
+        await revealSpawn(expired, 1, "0x01", noop);
+      } catch (error) {
+        caught = error;
+      }
+      expect(calls).to.equal(1);
+      expect(caught.message).to.match(/^spawn reverted with RequestExpired/);
+    } finally {
+      delete process.env.GERMLINE_POLL_MS;
+    }
   });
   it("e2e.js commits again when a seed is stillborn, instead of abandoning the run", async function () {
     const stillborn = () => new Error("stillborn: the seed produced 0x00, a genome that already exists");

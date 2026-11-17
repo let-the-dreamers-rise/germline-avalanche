@@ -24,7 +24,7 @@ const { evaluate } = require("../engine/fitness");
 const genomes = require("../lib/genomes");
 const census = require("../lib/census");
 const { loadDeployment, assertChainMatches, txLink, eventFrom } = require("../lib/chain");
-const { waitForSeed } = require("./breed");
+const { waitForSeed, revealSpawn } = require("./breed");
 const { verify } = require("./verify");
 
 // Genomes the forger would like to claim descent for: real, honestly
@@ -86,8 +86,7 @@ async function forge(options = {}) {
   if (!forgedGenome) throw new Error("every forged candidate is already born; edit WISHES");
   const forgedRoot = genomeRoot(forgedGenome);
 
-  const spawnTx = await germline.spawn(parentId, forgedRoot);
-  const spawnReceipt = await spawnTx.wait();
+  const spawnReceipt = await revealSpawn(germline, parentId, forgedRoot, log);
   const childId = Number(eventFrom(germline, spawnReceipt, "Spawned").id);
   log("spawn (forged reveal)");
   log("  forged genome:  " + phenotype(forgedGenome));
