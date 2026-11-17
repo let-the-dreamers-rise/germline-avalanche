@@ -1,0 +1,30 @@
+{
+  "network": "avalanche",
+  "chainId": 43114,
+  "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+  "contractLink": "https://snowtrace.io/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+  "deployTx": "https://snowtrace.io/tx/0x2d78078d48b64c065789f928faf59edacb1ef7ee0dd6def605f7e124ed9ba45c",
+  "founder": {
+    "id": 1,
+    "foundTx": "https://snowtrace.io/tx/0xc819639fbda111e3bdb94afc85289b8bd8358dc9548ce0284263b076dd0e1f40",
+    "attestTx": "https://snowtrace.io/tx/0x94de89445184ddda3bfbd64f9774cd5c841fa3e056e971394fce9a9dbc94f3a4"
+  },
+  "honestChild": {
+    "id": 2,
+    "requestSpawnTx": "https://snowtrace.io/tx/0xfed09c1508b29c3127dea45fda97954eacd7a50ec6ba28343bbd4b376ea7c1f6",
+    "spawnTx": "https://snowtrace.io/tx/0x7ba087b537788c5b7f37a34c55b4e946c5bd224eafd998d4aac047d3bb45dce0",
+    "attestTx": "https://snowtrace.io/tx/0x7f026c840f50d7815bc185c7cae90b9ce53816e7659a673023fbc39acde999bd",
+    "verdict": "GENUINE"
+  },
+  "forgedChild": {
+    "id": 3,
+    "requestSpawnTx": "https://snowtrace.io/tx/0x8ae47aafb24357c73c47a55efd0c494079a7570c19d7f828ce11417e6ede05e1",
+    "spawnTx": "https://snowtrace.io/tx/0x9a0dee5b4dd0dc38f0d98ad4ece15d6c823376d7e3a346986b72f25fe23295e5",
+    "attestTx": "https://snowtrace.io/tx/0xc3d52b2b525ca3d4f0651c9f29375f179a98037bceda4b232dd928a0518542fb",
+    "verdict": "FORGED",
+    "failed": [
+      "heredity"
+    ]
+  },
+  "ranAt": "2026-11-17T20:57:02.441Z"
+}
