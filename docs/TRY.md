@@ -1,7 +1,14 @@
 # Try Germline
 
-Three levels. Each one takes the one before it a step further, and you can stop
-at any of them.
+**Quickest: in your browser.** Open the
+[try page](https://raw.githack.com/let-the-dreamers-rise/germline-avalanche/main/web/try.html). It runs a real search on
+your screen with nothing to install, then records it on Avalanche Fuji from a
+throwaway test wallet the page makes for you, and checks every organism against
+the chain. The page is `web/try.html` in this repo; open it locally with any
+static file server if you prefer.
+
+On your own machine there are three levels. Each one takes the one before it a
+step further, and you can stop at any of them.
 
 You need [Node.js](https://nodejs.org) 18 or newer and
 [git](https://git-scm.com). The commands are the same in Windows Command

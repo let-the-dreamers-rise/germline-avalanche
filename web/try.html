@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Try Germline</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e84142'/%3E%3Cpath d='M8 3v10M5 6h6M5 10h6' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E" />
+<meta name="description" content="Tune an AI configuration in your browser, then record every step on Avalanche Fuji and verify it." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
+<style>
+  /* Same instrument look as web/avalanche.html: flat surfaces, hairlines,
+     colour only where it carries meaning. Red is Avalanche; green is a check
+     that passed; nothing else is coloured. */
+  :root {
+    --paper: #edeff2; --panel: #ffffff; --panel-2: #f6f7f9;
+    --ink: #14171c; --ink-dim: #5a6270; --ink-faint: #8b939f;
+    --rule: #d2d7de; --rule-soft: #e2e6ea;
+    --accent: #e84142; --accent-ink: #b32b2c; --accent-wash: #fbe9e9;
+    --ok: #157f5b; --ok-wash: #e4f2ec;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", ui-sans-serif, Roboto, Helvetica, Arial, sans-serif;
+    --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", -apple-system, "Segoe UI", ui-sans-serif, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0e1013; --panel: #16191f; --panel-2: #1b1f26;
+      --ink: #e8eaee; --ink-dim: #99a1ad; --ink-faint: #626a77;
+      --rule: #2a2f38; --rule-soft: #21252c;
+      --accent: #ff5b5c; --accent-ink: #ff8a8b; --accent-wash: #2a1618;
+      --ok: #45b98c; --ok-wash: #12241d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0e1013; --panel: #16191f; --panel-2: #1b1f26;
+    --ink: #e8eaee; --ink-dim: #99a1ad; --ink-faint: #626a77;
+    --rule: #2a2f38; --rule-soft: #21252c;
+    --accent: #ff5b5c; --accent-ink: #ff8a8b; --accent-wash: #2a1618;
+    --ok: #45b98c; --ok-wash: #12241d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink); font-family: var(--sans);
+    font-size: 15.5px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  .sheet { max-width: 940px; margin: 0 auto; padding: 0 16px 96px; }
+  @media (min-width: 640px) { .sheet { padding: 0 28px 96px; } }
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .eyebrow {
+    font-family: var(--cond); font-weight: 700; font-size: 11.5px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint);
+  }
+
+  header.mast { padding: 48px 0 0; }
+  .wordmark { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .wordmark h1 {
+    font-family: var(--cond); font-weight: 700; font-size: 28px; margin: 0;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .wordmark .on {
+    font-family: var(--cond); font-weight: 600; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+    border-left: 1px solid var(--rule); padding-left: 16px;
+  }
+  .mast .rule { height: 3px; background: var(--accent); margin: 18px 0 0; }
+  .mast .rule + .rule { height: 1px; background: var(--rule); margin-top: 2px; }
+  .thesis { font-size: 20px; line-height: 1.5; margin: 26px 0 0; max-width: 32em; text-wrap: balance; }
+  .sub { color: var(--ink-dim); margin: 12px 0 0; max-width: 36em; }
+
+  section { margin: 48px 0 0; }
+  section > .eyebrow { display: block; margin-bottom: 8px; }
+  h2 { font-family: var(--cond); font-weight: 700; font-size: 24px; margin: 0 0 10px; text-wrap: balance; }
+  p { margin: 0 0 12px; max-width: 68ch; }
+
+  .panel { background: var(--panel); border: 1px solid var(--rule); padding: 18px; }
+  @media (min-width: 640px) { .panel { padding: 22px 24px; } }
+  .panel + .panel { border-top: 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .grow { flex: 1 1 auto; }
+
+  .choices { display: grid; gap: 0; border: 1px solid var(--rule); background: var(--panel); margin: 0 0 14px; }
+  @media (min-width: 640px) { .choices { grid-template-columns: 1fr 1fr; } }
+  .choice { display: flex; gap: 10px; padding: 14px 16px; cursor: pointer; align-items: flex-start; }
+  .choice + .choice { border-top: 1px solid var(--rule); }
+  @media (min-width: 640px) { .choice + .choice { border-top: 0; border-left: 1px solid var(--rule); } }
+  .choice input { margin-top: 5px; accent-color: var(--accent); }
+  .choice b { display: block; }
+  .choice span { color: var(--ink-dim); font-size: 13.5px; }
+
+  button {
+    font: 600 14px/1 var(--sans); padding: 12px 18px; border: 1px solid var(--ink);
+    background: var(--ink); color: var(--paper); cursor: pointer; border-radius: 0;
+  }
+  button.secondary { background: transparent; color: var(--ink); border-color: var(--rule); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  button:focus-visible, .choice:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 14px; margin: 0; }
+  .kv dt { color: var(--ink-faint); font-family: var(--cond); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 12px; padding-top: 2px; }
+  .kv dd { margin: 0; font-family: var(--mono); overflow-wrap: anywhere; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--panel); margin: 14px 0 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  th { font-family: var(--cond); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
+  td.num { font-family: var(--mono); text-align: right; white-space: nowrap; }
+  td.cfg { font-family: var(--mono); font-size: 12.5px; }
+  tr.best td { background: var(--ok-wash); }
+  .up { color: var(--ok); }
+  .down { color: var(--ink-faint); }
+
+  .result { display: grid; gap: 0; border: 1px solid var(--rule); background: var(--panel); margin: 14px 0 0; }
+  @media (min-width: 640px) { .result { grid-template-columns: repeat(3, 1fr); } }
+  .result div { padding: 14px 16px; }
+  .result div + div { border-top: 1px solid var(--rule); }
+  @media (min-width: 640px) { .result div + div { border-top: 0; border-left: 1px solid var(--rule); } }
+  .result .big { font-family: var(--mono); font-size: 24px; font-weight: 600; display: block; }
+  .result .big.ok { color: var(--ok); }
+
+  .badge { font-family: var(--mono); font-size: 11.5px; font-weight: 600; padding: 2px 7px; white-space: nowrap; }
+  .badge.ok { color: var(--ok); background: var(--ok-wash); }
+  .badge.bad { color: var(--accent-ink); background: var(--accent-wash); }
+
+  .log {
+    font-family: var(--mono); font-size: 12px; line-height: 1.55; background: var(--panel-2);
+    border: 1px solid var(--rule); padding: 12px 14px; max-height: 260px; overflow: auto;
+    white-space: pre-wrap; overflow-wrap: anywhere; margin: 14px 0 0;
+  }
+  .note { color: var(--ink-dim); font-size: 13.5px; }
+  .warn { color: var(--accent-ink); }
+  .error { border: 1px solid var(--accent); background: var(--accent-wash); color: var(--accent-ink); padding: 12px 14px; margin: 14px 0 0; white-space: pre-wrap; }
+  .share { border: 1px solid var(--ok); background: var(--ok-wash); padding: 14px 16px; margin: 14px 0 0; overflow-wrap: anywhere; }
+  .share a { color: var(--ok); font-family: var(--mono); }
+  .steps-list { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+  .steps-list > li { counter-increment: s; padding: 16px 0 16px 34px; position: relative; border-top: 1px solid var(--rule-soft); }
+  .steps-list > li:first-child { border-top: 0; padding-top: 0; }
+  .steps-list > li::before {
+    content: counter(s); position: absolute; left: 0; top: 16px; font-family: var(--mono);
+    font-size: 12px; color: var(--accent); border: 1px solid var(--accent); width: 22px; height: 22px;
+    display: grid; place-items: center;
+  }
+  .steps-list > li:first-child::before { top: 0; }
+  .steps-list h3 { margin: 0 0 6px; font-size: 16px; }
+  footer { margin: 64px 0 0; color: var(--ink-faint); font-size: 13px; border-top: 1px solid var(--rule); padding-top: 16px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header class="mast">
+    <div class="wordmark"><h1>Germline</h1><span class="on">Try it</span></div>
+    <div class="rule"></div><div class="rule"></div>
+    <p class="thesis">Tune an AI configuration, and keep a record of how you found it that <b>anyone can check</b> without trusting you.</p>
+    <p class="sub">Two steps. The first runs entirely in this page. The second records the same kind of search on Avalanche's Fuji test network, from a test wallet this page makes for you, and then verifies every step against the chain.</p>
+  </header>
+
+  <!-- 1. local search -->
+  <section id="local">
+    <span class="eyebrow">Step 1 &middot; no wallet, nothing to install</span>
+    <h2>Run a search in your browser</h2>
+    <p>Pick a system to tune. Germline starts from what the team runs today, breeds variations, and keeps the ones that score better.</p>
+    <div class="choices" role="radiogroup" aria-label="Example to tune">
+      <label class="choice"><input type="radio" name="trial" value="supportAgent" checked />
+        <div><b>Support agent</b><span>Four RAG settings: retrieval depth, reranking, temperature and tool policy. 216 combinations.</span></div></label>
+      <label class="choice"><input type="radio" name="trial" value="pricing" />
+        <div><b>Checkout discounts</b><span>Two discount tiers, a basket threshold and free shipping. About 130,000 combinations, no model involved.</span></div></label>
+    </div>
+    <div class="row">
+      <button id="run-local">Run the search</button>
+      <span class="note" id="local-status"></span>
+    </div>
+    <div id="local-out" hidden>
+      <div class="result">
+        <div><span class="eyebrow">Started at</span><span class="big" id="l-start"></span><span class="note" id="l-start-cfg"></span></div>
+        <div><span class="eyebrow">Best found</span><span class="big ok" id="l-best"></span><span class="note" id="l-best-cfg"></span></div>
+        <div><span class="eyebrow">Configurations tried</span><span class="big" id="l-tried"></span><span class="note" id="l-space"></span></div>
+      </div>
+      <p style="margin:18px 0 0"><b>How the best one was found</b>, one mutation at a time:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Configuration</th><th style="text-align:right">Score</th><th style="text-align:right">Change</th></tr></thead>
+        <tbody id="l-path"></tbody>
+      </table></div>
+      <details style="margin:12px 0 0"><summary class="note" style="cursor:pointer">Every configuration it tried</summary>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>From</th><th>Configuration</th><th style="text-align:right">Score</th><th style="text-align:right">Change</th></tr></thead>
+        <tbody id="l-rows"></tbody>
+      </table></div></details>
+      <p class="note" style="margin-top:12px">Here the random seeds are made locally, so this run proves nothing to anyone else. Step 2 is where it becomes a record.</p>
+    </div>
+  </section>
+
+  <!-- 2. on chain -->
+  <section id="chain">
+    <span class="eyebrow">Step 2 &middot; Avalanche Fuji test network, free</span>
+    <h2>Record it on chain and verify it</h2>
+    <p>Every configuration becomes an on-chain record of its parent and its score. Each child is bred by <b>commit-reveal</b>: you commit first, and the random seed comes from the hash of a block that did not exist yet, so nobody can pick their own mutation. At the end, the page re-derives every child from its parent and that seed.</p>
+
+    <ol class="steps-list">
+      <li>
+        <h3>Your test wallet</h3>
+        <p class="note">This page made a wallet just for this, and keeps its key in this browser only. Use it for test AVAX, never real funds.</p>
+        <dl class="kv">
+          <dt>Address</dt><dd id="w-address">&hellip;</dd>
+          <dt>Balance</dt><dd><span id="w-balance">&hellip;</span> <span class="note" id="w-need"></span></dd>
+          <dt>Network</dt><dd id="w-net">&hellip;</dd>
+        </dl>
+      </li>
+      <li>
+        <h3>Give it some test AVAX</h3>
+        <p class="note">About 0.1 test AVAX covers a run. It has no real value.</p>
+        <div class="row">
+          <button id="fund-wallet" class="secondary">Send 0.1 test AVAX from MetaMask or Core</button>
+          <button id="copy-address" class="secondary">Copy address</button>
+          <a href="https://build.avax.network/console/primary-network/faucet" target="_blank" rel="noopener">or use the Avalanche faucet</a>
+        </div>
+        <p class="note" id="fund-status"></p>
+      </li>
+      <li>
+        <h3>Record and verify</h3>
+        <p class="note">Runs the example you picked in step 1: a registry you own, then 4 rounds of breeding. Usually 15 to 40 small transactions, two or three minutes. Keep this tab open.</p>
+        <div class="row">
+          <button id="run-chain" disabled>Record on Fuji</button>
+          <span class="note" id="chain-status"></span>
+        </div>
+        <div class="log" id="chain-log" hidden></div>
+        <div id="chain-error" class="error" hidden></div>
+        <div id="chain-out" hidden>
+          <div class="result">
+            <div><span class="eyebrow">On chain</span><span class="big" id="c-count"></span><span class="note" id="c-tx"></span></div>
+            <div><span class="eyebrow">Verified</span><span class="big ok" id="c-verified"></span><span class="note">re-derived from the chain</span></div>
+            <div><span class="eyebrow">Best found</span><span class="big" id="c-best"></span><span class="note" id="c-best-cfg"></span></div>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Organism</th><th>Configuration</th><th style="text-align:right">Score</th><th>Heredity</th><th>Score check</th><th>Verdict</th></tr></thead>
+            <tbody id="c-rows"></tbody>
+          </table></div>
+          <div class="share" id="c-share"></div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <span class="eyebrow">Step 3</span>
+    <h2>Use your own system</h2>
+    <p>The examples above stand in for an eval. To tune your own prompt, agent or rules, describe the settings and give Germline a function that scores a configuration. That runs on your machine; only hashes and scores go on chain. <a href="https://github.com/let-the-dreamers-rise/germline-avalanche/blob/main/docs/TRY.md">The guide</a> takes about ten minutes.</p>
+    <p class="note">Already-live reference: the <a href="https://testnet.snowtrace.io/address/0xA0448Cd63f746a60447cfF1817ec9781C25F7b25">Germline registry on Fuji</a>, with an honest child that verifies and a deliberately forged one that does not, re-checked on every push by <a href="https://github.com/let-the-dreamers-rise/germline-avalanche/actions/workflows/fuji.yml">public CI</a>.</p>
+  </section>
+
+  <footer>
+    Open source: <a href="https://github.com/let-the-dreamers-rise/germline-avalanche">github.com/let-the-dreamers-rise/germline-avalanche</a>. This page runs the same SDK code as the command line, bundled for the browser.
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.5/ethers.umd.min.js"></script>
+<script src="try-bundle.js"></script>
+<script src="try.js"></script>
+</body>
+</html>

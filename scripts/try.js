@@ -27,6 +27,7 @@ const hre = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 const { optimise } = require("../sdk");
+const { verifyLineage } = require("../sdk/verify");
 const { deploymentsDir, hardenProvider, txLink, addressLink } = require("../lib/chain");
 
 const FAUCET = "https://build.avax.network/console/primary-network/faucet";
@@ -158,48 +159,8 @@ function linking(network, log, hashes) {
   };
 }
 
-/// Read every organism of the run back from the chain and check it, without
-/// trusting anything the run itself remembers except the configurations,
-/// which are what a root is the hash of.
-async function verifyRun(trial, contract, population) {
-  const byId = new Map(population.map((o) => [o.id, o]));
-  const results = [];
-  for (const member of population) {
-    if (member.onChainId == null) continue;
-    const organism = await contract.organismOf(member.onChainId);
-    const onChainRoot = String(organism.genomeRoot).toLowerCase();
-    const rootHolds = trial.root(member.config).toLowerCase() === onChainRoot;
-
-    let heredity = null;
-    if (member.parent) {
-      const parent = byId.get(member.parent);
-      const derived = trial.mutate(parent.config, organism.mutationSeed);
-      heredity = trial.root(derived).toLowerCase() === onChainRoot;
-    }
-
-    const fitness = await contract.fitnessOf(member.onChainId);
-    const measured = await trial.evaluate(member.config);
-    const attested = fitness.attestedAt !== 0n;
-    const scoreHolds = !attested || Number(fitness.score) === measured.fitnessBps;
-    const evidenceHolds =
-      !attested ||
-      String(fitness.evidenceRoot).toLowerCase() === String(measured.evidenceRoot).toLowerCase();
-
-    const genuine = rootHolds && heredity !== false && scoreHolds && evidenceHolds;
-    results.push({
-      id: member.onChainId,
-      parent: member.parent ? byId.get(member.parent).onChainId : 0,
-      label: member.label,
-      fitnessBps: member.fitnessBps,
-      attested,
-      heredity,
-      scoreHolds,
-      evidenceHolds,
-      verdict: genuine ? "GENUINE" : "FORGED",
-    });
-  }
-  return results;
-}
+// The same check web/try.html runs in the browser; see sdk/verify.js.
+const verifyRun = verifyLineage;
 
 async function tryIt(options = {}) {
   const log = options.log || console.log;
