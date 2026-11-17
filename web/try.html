@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Try Germline</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e84142'/%3E%3Cpath d='M8 3v10M5 6h6M5 10h6' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E" />
 <meta name="description" content="Tune an AI configuration in your browser, then record every step on Avalanche Fuji and verify it." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -376,6 +377,11 @@
     return new E.Wallet(key);
   }
 
+  function avax(wei) {
+    var n = Number(E.formatEther(wei));
+    return n < 0.001 ? "less than 0.001 AVAX" : n.toFixed(3) + " AVAX";
+  }
+
   async function refreshBalance() {
     if (!provider || !wallet) return;
     try {
@@ -384,7 +390,7 @@
       var price = fee.gasPrice || fee.maxFeePerGas || 0n;
       needed = price * GAS_BUDGET;
       $("w-balance").textContent = Number(E.formatEther(balance)).toFixed(4) + " AVAX";
-      $("w-need").textContent = balance >= needed ? "enough for a run" : "a run needs about " + Number(E.formatEther(needed)).toFixed(3);
+      $("w-need").textContent = balance >= needed ? "enough for a run" : "a run needs about " + avax(needed);
       $("run-chain").disabled = busy || balance < needed;
     } catch (e) {
       $("w-balance").textContent = "could not read (" + (e.shortMessage || e.message) + ")";
