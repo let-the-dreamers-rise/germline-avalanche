@@ -68,11 +68,15 @@
     return loads[src];
   }
 
+  // The bundle reads window.ethers as it loads, so ethers has to come first.
+  function loadVerifier() {
+    return (window.ethers ? Promise.resolve() : load(ETHERS)).then(function () { return load("live-bundle.js"); });
+  }
+
   // Run the live check against the first RPC that answers.
   async function live(childId, say) {
     say("Loading the verifier…");
-    if (!window.ethers) await load(ETHERS);
-    await load("live-bundle.js");
+    await loadVerifier();
     var E = window.ethers, L = window.GermlineLive;
     var receipt = (OVERRIDE && OVERRIDE.receipt) || L.receipt;
     var entry = receipt.honestChild.id === childId ? receipt.honestChild : receipt.forgedChild;
@@ -240,6 +244,18 @@
 
     run.addEventListener("click", play);
     select(current);
+
+    // Fetch the verifier as soon as it is about to be seen, so pressing the
+    // button only waits for the chain, not for a download.
+    var warm = function () { loadVerifier().catch(function () {}); };
+    if ("IntersectionObserver" in window) {
+      var seen = new IntersectionObserver(function (entries) {
+        if (entries.some(function (e) { return e.isIntersecting; })) { seen.disconnect(); warm(); }
+      }, { rootMargin: "400px 0px" });
+      seen.observe(host);
+    }
+    run.addEventListener("pointerenter", warm, { once: true });
+    run.addEventListener("focus", warm, { once: true });
   }
 
   mounts.forEach(mount);

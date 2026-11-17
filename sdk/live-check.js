@@ -42,12 +42,10 @@ async function requestBlockOf(contract, provider, requestTx) {
 // born. Ids only increase, so it is the count of organisms between the two
 // that name the same parent.
 async function ordinalOf(contract, parentId, childId) {
-  let ordinal = 0;
-  for (let id = parentId + 1; id < childId; id++) {
-    const sibling = await contract.organismOf(id);
-    if (Number(sibling.parent) === parentId) ordinal++;
-  }
-  return ordinal;
+  const ids = [];
+  for (let id = parentId + 1; id < childId; id++) ids.push(id);
+  const siblings = await Promise.all(ids.map((id) => contract.organismOf(id)));
+  return siblings.filter((s) => Number(s.parent) === parentId).length;
 }
 
 /// contract: an ethers Contract for Germline on a read-only provider.
@@ -60,8 +58,21 @@ async function checkLive({ contract, provider, childId, requestTx, log }) {
   const child = await contract.organismOf(childId);
   const parentId = Number(child.parent);
   if (parentId === 0) throw new Error("organism " + childId + " is a founder; it has no parent to derive from");
-  const parent = await contract.organismOf(parentId);
-  say("read organism " + childId + " and its parent " + parentId + " from the chain");
+  say("read organism " + childId + " from the chain");
+
+  // Everything else depends only on the child, so ask for it all at once:
+  // one round trip of waiting instead of six on a slow public RPC.
+  const [parent, fitness, seedInputs] = await Promise.all([
+    contract.organismOf(parentId),
+    contract.fitnessOf(childId),
+    requestTx
+      ? Promise.all([
+          requestBlockOf(contract, provider, requestTx).then((n) => provider.getBlock(n).then((b) => ({ n, b }))),
+          ordinalOf(contract, parentId, childId),
+        ])
+      : Promise.resolve(null),
+  ]);
+  say("read its parent, its attested score and its seed's block");
 
   const parentGenome = genomeForRoot(parent.genomeRoot);
   if (!parentGenome) throw new Error("the parent's root resolves to no configuration in the gene space");
@@ -71,10 +82,9 @@ async function checkLive({ contract, provider, childId, requestTx, log }) {
   say("re-ran the mutation: " + (heredity ? "same child" : "a different child"));
 
   let seed = { checked: false };
-  if (requestTx) {
-    const requestBlock = await requestBlockOf(contract, provider, requestTx);
-    const block = await provider.getBlock(requestBlock);
-    const ordinal = await ordinalOf(contract, parentId, childId);
+  if (seedInputs) {
+    const [{ n: requestBlock, b: block }, ordinal] = seedInputs;
+    if (!block) throw new Error("block " + requestBlock + " is no longer served by this RPC");
     const recomputed = ethers.solidityPackedKeccak256(
       ["bytes32", "bytes32", "uint256", "uint32"],
       [parent.genomeRoot, block.hash, parentId, ordinal]
@@ -84,7 +94,6 @@ async function checkLive({ contract, provider, childId, requestTx, log }) {
   }
 
   let score = { attested: false };
-  const fitness = await contract.fitnessOf(childId);
   if (fitness.attestedAt !== 0n) {
     const onChainGenome = genomeForRoot(child.genomeRoot);
     if (!onChainGenome) {

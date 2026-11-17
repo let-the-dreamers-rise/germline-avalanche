@@ -64,6 +64,10 @@ themselves rather than trusting the vendor who produced it.
 > Fuji from your own wallet. Plugging in your own eval is one file.
 > See **[docs/TRY.md](docs/TRY.md)**.
 >
+> **For AI agents and scripts:** `npm run agent` tunes a configuration and
+> `npm run check` re-checks the live Fuji record, each in one command with JSON
+> out. See **[AGENTS.md](AGENTS.md)**.
+>
 > The original registry remains live on 0G mainnet, and the upstream project is
 > at [let-the-dreamers-rise/germline](https://github.com/let-the-dreamers-rise/germline).
 
