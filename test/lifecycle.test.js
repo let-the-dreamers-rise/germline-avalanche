@@ -28,6 +28,8 @@ const { verify } = require("../scripts/verify");
 const { forge } = require("../scripts/forge");
 const { e2e, breedAlive } = require("../scripts/e2e");
 const { recheck } = require("../scripts/recheck");
+const { checkLive } = require("../sdk/live-check");
+const { check, ABI: CHECK_ABI } = require("../scripts/check");
 
 const SURVIVAL = 3148; // the measured action-only baseline; see engine/fitness.js
 const STEP = 500;
@@ -311,6 +313,47 @@ describe("lifecycle scripts", function () {
     expect(result.forged.seed.holds).to.equal(true);
     // Read-only means read-only: no transaction, so no new block.
     expect(await ethers.provider.getBlockNumber()).to.equal(before);
+  });
+  it("checkLive gives the browser the same verdicts from public reads alone", async function () {
+    const receipt = await withBlockPump(e2e({ log: noop }));
+    // A plain read-only contract, as a web page would build it: no signer.
+    const contract = new ethers.Contract(this.address, this.germline.interface, ethers.provider);
+    const before = await ethers.provider.getBlockNumber();
+
+    const honest = await checkLive({
+      contract,
+      provider: ethers.provider,
+      childId: receipt.honestChild.id,
+      requestTx: receipt.honestChild.requestSpawnTx,
+    });
+    expect(honest.verdict).to.equal("GENUINE");
+    expect(honest.heredity).to.equal(true);
+    expect(honest.seed.checked && honest.seed.holds).to.equal(true);
+    expect(honest.score.checked && honest.score.holds && honest.score.evidenceHolds).to.equal(true);
+
+    const forged = await checkLive({
+      contract,
+      provider: ethers.provider,
+      childId: receipt.forgedChild.id,
+      requestTx: receipt.forgedChild.requestSpawnTx,
+    });
+    expect(forged.verdict).to.equal("FORGED");
+    expect(forged.failed).to.deep.equal(["heredity"]);
+    expect(forged.seed.holds).to.equal(true);
+    expect(forged.derivedRoot).to.not.equal(forged.onChainRoot);
+    expect(await ethers.provider.getBlockNumber()).to.equal(before);
+  });
+  it("check.js gives an agent both verdicts as JSON with its own minimal ABI", async function () {
+    const receipt = await withBlockPump(e2e({ log: noop }));
+    const result = await check({ receipt, provider: ethers.provider, abi: CHECK_ABI });
+    expect(result.ok).to.equal(true);
+    expect(result.children.map((c) => [c.childId, c.verdict])).to.deep.equal([[2, "GENUINE"], [3, "FORGED"]]);
+    expect(result.children.every((c) => c.seed.checked && c.seed.holds)).to.equal(true);
+    // A receipt that claims the wrong verdict is reported, not waved through.
+    const swapped = { ...receipt, honestChild: { ...receipt.honestChild, verdict: "FORGED" } };
+    const caught = await check({ receipt: swapped, provider: ethers.provider, abi: CHECK_ABI });
+    expect(caught.ok).to.equal(false);
+    expect(JSON.parse(JSON.stringify(caught, (k, v) => (typeof v === "bigint" ? String(v) : v))).ok).to.equal(false);
   });
   it("recheck.js fails when a receipt passes a forged child off as honest", async function () {
     const receipt = await withBlockPump(e2e({ log: noop }));

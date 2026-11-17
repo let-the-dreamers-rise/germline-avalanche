@@ -155,7 +155,7 @@ It says genuine. Then show the forged case from `test/lifecycle.test.js`.
 > have produced. It fails arithmetic, not trust."
 
 **2:20-2:50 -- the viewer.**
-Open `web/index.html`. Pan the lineage tree, then hold on the fitness chart.
+Open `web/viewer.html`. Pan the lineage tree, then hold on the fitness chart.
 
 > "Just under ten thousand real recorded transitions behind this. It climbs
 > from 3148 to 4765 in three generations -- and the config it finds is not the
@@ -185,7 +185,7 @@ In execution order.
 - [ ] `npx hardhat run scripts/breed.js --network zerog`, several times
 - [ ] `npx hardhat run scripts/verify.js --network zerog` -- checks the newest bred organism
 - [ ] `npx hardhat run scripts/status.js --network zerog`
-- [ ] Paste the contract address into `web/index.html`, open it, screenshot
+- [ ] Paste the contract address into `web/viewer.html`, open it, screenshot
       the lineage and fitness chart
 - [ ] Push the repo public; confirm the README renders
 - [ ] Record the video, 3 minutes maximum

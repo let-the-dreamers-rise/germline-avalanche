@@ -29,37 +29,14 @@ const path = require("path");
 const { optimise } = require("../sdk");
 const { verifyLineage } = require("../sdk/verify");
 const { deploymentsDir, hardenProvider, txLink, addressLink } = require("../lib/chain");
+const { loadTrial } = require("../lib/trial-file");
 
 const FAUCET = "https://build.avax.network/console/primary-network/faucet";
-const DEFAULT_TRIAL = path.join(__dirname, "..", "examples", "prompt-config.js");
 
 // Roughly what a default run costs, in gas: a deploy, a founder, and up to a
 // dozen children at three transactions each. Used only to stop early with a
 // useful message instead of failing halfway through for want of gas.
 const GAS_BUDGET = 10000000n;
-
-function loadTrial(file) {
-  const resolved = path.resolve(process.cwd(), file || process.env.TRIAL || DEFAULT_TRIAL);
-  if (!fs.existsSync(resolved)) {
-    throw new Error("TRIAL points at " + resolved + ", which does not exist");
-  }
-  const mod = require(resolved);
-  const trial = mod && (mod.trial || mod.default || mod);
-  const usable =
-    trial &&
-    typeof trial.evaluate === "function" &&
-    typeof trial.mutate === "function" &&
-    typeof trial.root === "function" &&
-    trial.seed;
-  if (!usable) {
-    throw new Error(
-      resolved +
-        " must export { trial }, built with defineTrial() and given a seed " +
-        "configuration. See examples/prompt-config.js for the shape."
-    );
-  }
-  return { trial, file: path.relative(process.cwd(), resolved) || resolved };
-}
 
 // A local chain only mines when a transaction arrives, but commit-reveal has
 // to wait for the next block to exist. On a live chain that happens by

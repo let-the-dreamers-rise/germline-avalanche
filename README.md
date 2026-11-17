@@ -64,6 +64,10 @@ themselves rather than trusting the vendor who produced it.
 > Fuji from your own wallet. Plugging in your own eval is one file.
 > See **[docs/TRY.md](docs/TRY.md)**.
 >
+> **For AI agents and scripts:** `npm run agent` tunes a configuration and
+> `npm run check` re-checks the live Fuji record, each in one command with JSON
+> out. See **[AGENTS.md](AGENTS.md)**.
+>
 > The original registry remains live on 0G mainnet, and the upstream project is
 > at [let-the-dreamers-rise/germline](https://github.com/let-the-dreamers-rise/germline).
 
@@ -366,7 +370,7 @@ npx hardhat run scripts/verify.js --network zerog
 npx hardhat run scripts/status.js    --network zerog
 ```
 
-Then open `web/index.html` to see the lineage and the fitness climb. It is a
+Then open `web/viewer.html` to see the lineage and the fitness climb. It is a
 single static file with no build step; pass `?address=0x...` or edit the
 config block at the top.
 
@@ -422,6 +426,7 @@ engine/                    the reference trial and its measured fitness
 examples/                  a RAG agent and a pricing ladder
 scripts/                   preflight, deploy, found, breed, verify, status
 lib/                       chain access, genome cache, storage publication
-web/index.html             lineage viewer, single file, no build step
+web/index.html             landing page; try.html runs it in the browser
+web/viewer.html            lineage viewer, single file, no build step
 test/                      45 tests
 ```
