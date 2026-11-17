@@ -50,7 +50,7 @@
       tl.add(show(4), 11.1).add(words(4), 11.1)
         .from(q(4, "p"), { autoAlpha: 0, y: 12, duration: 0.5, stagger: 0.4 }, 11.6)
         .fromTo(q(4, ".ex-bar span"), { scaleX: 0.34 }, { scaleX: 0.89, duration: 2.2, ease: "power3.inOut" }, 12.3)
-        .add(gsap.fromTo({ v: 3148 }, { v: 3148 }, { v: 4765, duration: 2.2, ease: "power3.inOut", onUpdate: function () { score.textContent = String(Math.round(this.targets()[0].v)); } }), 12.3)
+        .add(gsap.fromTo({ v: 3148 }, { v: 3148 }, { v: 4765, duration: 2.2, ease: "power3.inOut", onUpdate: function () { score.textContent = (this.targets()[0].v / 100).toFixed(1) + "%"; } }), 12.3)
         .add(hide(4), 15);
 
       tl.add(show(5), 15.5).add(words(5), 15.5)

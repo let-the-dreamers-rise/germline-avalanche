@@ -70,24 +70,24 @@
     </div>
     <ol class="ledger" data-reveal data-stagger>
       <li class="entry">
-        <div class="entry-head"><span class="entry-id">#1 founder</span><span class="entry-score">3148 bps</span></div>
+        <div class="entry-head"><span class="entry-id">#1 starting point</span><span class="entry-score">31.5%</span></div>
         <p class="entry-genes">action-only</p>
         <p class="entry-tx"><a href="https://testnet.snowtrace.io/tx/0xfab44054ae42b1139a53adf794b78342494f169c203612c4fa334ff19ce63ac1">seedFounder</a><a href="https://testnet.snowtrace.io/tx/0x5ae608fdeb93cc0b0e6983db7a102a9d0d70bf633262ec46e28ed0aa92237da0">attestFitness</a></p>
       </li>
       <li class="entry">
-        <div class="entry-head"><span class="entry-id">#2 child of #1</span><span class="entry-score">3821 bps</span></div>
-        <p class="entry-genes">colour + size <span class="up">+673</span></p>
+        <div class="entry-head"><span class="entry-id">#2 child of #1</span><span class="entry-score">38.2%</span></div>
+        <p class="entry-genes">colour + size <span class="up">+6.7 points</span></p>
         <p class="entry-tx"><a href="https://testnet.snowtrace.io/tx/0xdddd9ecd080015d431a9387ccfb28d17e40cdb13672e1dce7ffd273c37ff4247">requestSpawn</a><a href="https://testnet.snowtrace.io/tx/0x3895bd8673e34cd8305cc8570a2c95a28c63762c691f6f3c62d1148fdaee338a">spawn</a><a href="https://testnet.snowtrace.io/tx/0x097d6c07ce6d445ccc59b92ef69760c44230be75c64dac6dd91bd0f51a629c30">attestFitness</a></p>
         <span class="chip genuine">GENUINE</span>
       </li>
       <li class="entry entry-forged">
-        <div class="entry-head"><span class="entry-id">#3 child of #1, forged</span><span class="entry-score">4602 bps</span></div>
+        <div class="entry-head"><span class="entry-id">#3 claims to be a child of #1</span><span class="entry-score">46.0%</span></div>
         <p class="entry-genes">colour + size + ring + momentum, a genome its seed could not produce</p>
         <p class="entry-tx"><a href="https://testnet.snowtrace.io/tx/0x6dde95396c9dac6f0b3aef6deb22e19e041114ba0be1b44fdc62117db5deeb01">requestSpawn</a><a href="https://testnet.snowtrace.io/tx/0xc5a19232d52a0152981d6ead72a460bae71f1e0532052a36574e3e8091a71223">spawn</a><a href="https://testnet.snowtrace.io/tx/0xf979a1cfc6511d94104a0952149a2d6b23515d417c6e76b358c9fb34a11345fd">attestFitness</a></p>
-        <span class="chip forged">FORGED &middot; heredity</span>
+        <span class="chip forged">FORGED &middot; parent mismatch</span>
       </li>
     </ol>
-    <p class="fine">The forged reveal transaction succeeds on chain by design. What fails is the re-derivation anyone can run afterwards.</p>
+    <p class="fine">The forged child&rsquo;s transaction goes through on chain, by design. What fails is the check anyone can run afterwards: re-breeding its parent does not produce it. Each link opens the transaction on Snowtrace, Avalanche&rsquo;s block explorer.</p>
   </div>
 </section>
 
@@ -96,7 +96,7 @@
     <div class="section-head">
       <p class="eyebrow">Verification</p>
       <h2 data-split>Both outcomes are the feature working.</h2>
-      <p class="lede" data-reveal>A verifier that only ever says yes has told you nothing. Check each child yourself: your browser reads it from Fuji and re-runs the checks, no wallet needed.</p>
+      <p class="lede" data-reveal>A verifier that only ever says yes has told you nothing. Pick a child and press <b>Check it live</b>: your browser reads it from Fuji and re-runs the checks, no wallet needed.</p>
     </div>
     <div data-verdict-machine></div>
     <noscript><p class="lede">Honest child #2: GENUINE. Forged child #3: FORGED, heredity failed. Run <code>npm run recheck:fuji</code> to check both yourself.</p></noscript>
@@ -147,6 +147,7 @@
         </tbody>
       </table>
     </div>
+    <p class="fine">Scores in basis points: 100 = 1%.</p>
     <p class="lede" data-reveal>The deciding column is <b>sampled</b>, not the size of the space. Under one percent, which is what a real configuration space looks like, selection is ahead. So Germline sells a verifiable record of whatever search you ran, and <code>search()</code> reports <code>run.verdict.winner</code> with the random control switched on.</p>
   </div>
 </section>

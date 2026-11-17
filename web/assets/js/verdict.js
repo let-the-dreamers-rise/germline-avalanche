@@ -25,10 +25,10 @@
       tx: "0x3895bd8673e34cd8305cc8570a2c95a28c63762c691f6f3c62d1148fdaee338a",
       verdict: "GENUINE",
       checks: [
-        ["Heredity", true, "seed re-derives 0x454f…8eee, chain holds 0x454f…8eee"],
-        ["Seed", true, "keccak(parent root, blockhash 61187418, #1, ordinal 0) = 0x71cb…ef78"],
-        ["Score", true, "attested 3821, re-measured 3821"],
-        ["Evidence", true, "evidence root matches the transcript"]
+        ["Parent match", true, "Re-breeding #1 with its seed gives exactly this child (0x454f…8eee)."],
+        ["Fair seed", true, "The seed came from block 61187418, which did not exist when breeding was requested."],
+        ["Score", true, "Claimed 38.2%. Re-measured: 38.2%."],
+        ["Evidence", true, "The recorded evidence matches what was published."]
       ]
     },
     3: {
@@ -37,10 +37,10 @@
       tx: "0xc5a19232d52a0152981d6ead72a460bae71f1e0532052a36574e3e8091a71223",
       verdict: "FORGED",
       checks: [
-        ["Heredity", false, "seed re-derives ring:UDLR 0xbe57…93b1, chain holds 0x253e…df5c"],
-        ["Seed", true, "keccak(parent root, blockhash 61187439, #1, ordinal 1) = 0x0c84…993a"],
-        ["Score", true, "attested 4602, re-measured 4602"],
-        ["Evidence", true, "evidence root matches the transcript"]
+        ["Parent match", false, "Re-breeding #1 with its seed gives a different child (0xbe57…93b1), not the one recorded (0x253e…df5c). This child did not come from its parent."],
+        ["Fair seed", true, "The seed came from block 61187439, which did not exist when breeding was requested."],
+        ["Score", true, "Claimed 46.0%. Re-measured: 46.0%. A real score does not save a fake lineage."],
+        ["Evidence", true, "The recorded evidence matches what was published."]
       ]
     }
   };
@@ -101,22 +101,28 @@
     throw last || new Error("no RPC answered");
   }
 
-  // Turn a live result into the four rows the machine shows.
+  var pct = function (bps) { return (Number(bps) / 100).toFixed(1) + "%"; };
+
+  // Turn a live result into the four rows the machine shows, in plain words.
   function rowsFrom(r) {
     var rows = [[
-      "Heredity", r.heredity,
-      (r.heredity ? "re-ran the mutation: " : "re-ran the mutation and got a different child: ") +
-        r.derivedLabel + " " + short(r.derivedRoot) + ", chain holds " + short(r.onChainRoot)
+      "Parent match", r.heredity,
+      r.heredity
+        ? "Re-breeding #" + r.parentId + " with its seed gives exactly this child (" + short(r.onChainRoot) + ")."
+        : "Re-breeding #" + r.parentId + " with its seed gives a different child (" + short(r.derivedRoot) + "), not the one recorded (" + short(r.onChainRoot) + "). This child did not come from its parent."
     ]];
     rows.push(r.seed.checked
-      ? ["Seed", r.seed.holds, "block " + r.seed.requestBlock + " hash " + short(r.seed.blockHash) + ", ordinal " + r.seed.ordinal + " → " + short(r.seed.recomputed) + (r.seed.holds ? ", same as the chain" : ", not what the chain holds")]
-      : ["Seed", true, "not re-derived (no request transaction recorded)"]);
+      ? ["Fair seed", r.seed.holds, r.seed.holds
+          ? "The seed came from block " + r.seed.requestBlock + ", which did not exist when breeding was requested."
+          : "The seed does not match block " + r.seed.requestBlock + ". Someone picked it."]
+      : ["Fair seed", true, "Not re-derived here (no request transaction recorded)."]);
     rows.push(r.score.checked
-      ? ["Score", r.score.holds, "attested " + r.score.attestedBps + ", re-measured " + r.score.measuredBps + " in your browser"]
-      : ["Score", true, r.score.attested ? "attested " + r.score.attestedBps + ", not re-measurable here" : "not attested"]);
+      ? ["Score", r.score.holds, "Claimed " + pct(r.score.attestedBps) + ". Re-measured in your browser: " + pct(r.score.measuredBps) + "." +
+          (r.score.holds && !r.heredity ? " A real score does not save a fake lineage." : "")]
+      : ["Score", true, r.score.attested ? "Claimed " + pct(r.score.attestedBps) + ", not re-measurable here." : "No score claimed yet."]);
     rows.push(r.score.checked
-      ? ["Evidence", r.score.evidenceHolds, r.score.evidenceHolds ? "evidence root matches the re-measured transcript" : "evidence root does not match"]
-      : ["Evidence", true, "not checked"]);
+      ? ["Evidence", r.score.evidenceHolds, r.score.evidenceHolds ? "The recorded evidence matches what your browser re-measured." : "The recorded evidence does not match."]
+      : ["Evidence", true, "Not checked."]);
     return rows;
   }
 
@@ -136,7 +142,7 @@
       buttons[id] = b;
       picker.appendChild(b);
     });
-    var run = el("button", "btn btn-primary vm-run", "Check it live on Fuji");
+    var run = el("button", "btn btn-primary vm-run", "Check it live");
     run.type = "button";
     head.appendChild(picker);
     head.appendChild(run);
@@ -159,10 +165,10 @@
     wrap.appendChild(foot);
     host.appendChild(wrap);
 
-    function draw(rows, verdict, source, about) {
+    function draw(rows, verdict, source) {
       var c = CHILDREN[current];
       Object.keys(buttons).forEach(function (k) { buttons[k].setAttribute("aria-pressed", String(Number(k) === current)); });
-      meta.textContent = about || "Parent #1 (action-only, 3148) → revealed: " + c.revealed;
+      meta.textContent = "Parent #1 (31.5%) → this child: " + c.revealed;
       list.innerHTML = "";
       rows.forEach(function (chk) {
         var final = chk[1] !== null;
@@ -179,10 +185,10 @@
       stamp.textContent = verdict ? "VERDICT: " + verdict : "";
       foot.innerHTML = "";
       foot.appendChild(document.createTextNode(source + " "));
-      var a = el("a", null, "See the transaction on Snowtrace");
+      var a = el("a", null, "See it on the blockchain explorer");
       a.href = TX + c.tx;
       foot.appendChild(a);
-      foot.appendChild(document.createTextNode(" · or run "));
+      foot.appendChild(document.createTextNode(" · developers can re-run it with "));
       foot.appendChild(el("code", null, "npm run recheck:fuji"));
     }
 
@@ -198,16 +204,16 @@
     }
 
     // Reveal the rows one at a time, the way a reader would check them.
-    function reveal(rows, verdict, source, about) {
+    function reveal(rows, verdict, source) {
       var pending = rows.map(function (r) { return [r[0], null, "waiting"]; });
-      draw(pending, null, source, about);
+      draw(pending, null, source);
       var step = window.Site && window.Site.reduce ? 0 : 420;
       var i = 0;
       return new Promise(function (resolve) {
         (function next() {
-          if (i >= rows.length) { draw(rows, verdict, source, about); resolve(); return; }
+          if (i >= rows.length) { draw(rows, verdict, source); resolve(); return; }
           pending[i] = rows[i];
-          draw(pending, null, source, about);
+          draw(pending, null, source);
           i++;
           setTimeout(next, step);
         })();
@@ -226,8 +232,7 @@
         if (id !== current) return;
         var time = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
         status.textContent = "Done. Your browser read this from Avalanche Fuji and re-ran every check itself.";
-        var about = "Parent #" + result.parentId + " (" + result.parentLabel + ") → revealed on chain: " + (result.recordedLabel || short(result.onChainRoot));
-        await reveal(rowsFrom(result), result.verdict, "Checked live from Avalanche Fuji at " + time + ", in your browser.", about);
+        await reveal(rowsFrom(result), result.verdict, "Checked live from Avalanche Fuji at " + time + ", in your browser.");
       } catch (error) {
         status.textContent = "Couldn't reach Avalanche from this browser just now (" + (error.shortMessage || error.message) + ").";
         recorded("Showing the last recorded result instead. It is re-checked on every push:");

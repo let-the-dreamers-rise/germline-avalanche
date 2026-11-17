@@ -60,28 +60,28 @@
         <a class="btn btn-primary" href="try.html">Try it in your browser <span class="arrow" aria-hidden="true">&rarr;</span></a>
         <button class="cmd" type="button" data-copy="npm run try:local" aria-label="Copy the command npm run try:local"><span><span class="prompt">$</span> npm run try:local</span><span class="copy-label">Copy</span></button>
       </div>
-      <p class="hero-note hero-in">No wallet, no account, no data leaving your machine.</p>
+      <p class="hero-note hero-in">Takes about 20 seconds in your browser. No wallet, no account, nothing to install.</p>
     </div>
 
     <div class="hero-stage hero-in" data-parallax aria-label="The live lineage on Avalanche Fuji: a founder, an honest child that verifies GENUINE, and a forged child that verifies FORGED" role="img">
       <div class="stage-grid" data-depth="-10" aria-hidden="true"></div>
       <ol class="lineage" data-depth="14" aria-hidden="true">
         <li class="org" data-org="1">
-          <div class="org-top"><span class="org-id">#1 founder</span><span class="org-score" data-score="3148">3148</span></div>
+          <div class="org-top"><span class="org-id">#1 starting point</span><span class="org-score" data-score="3148">31.5</span></div>
           <div class="org-genes">action-only</div>
         </li>
-        <li class="link" data-link="2"><span class="link-line"></span><span class="link-text">commit &middot; block 61187418 &middot; seed <span class="hash" data-final="0x71cb&hellip;ef78">0x71cb&hellip;ef78</span></span></li>
+        <li class="link" data-link="2"><span class="link-line"></span><span class="link-text">bred from #1 &middot; dice from block 61187418 &middot; <span class="hash" data-final="0x71cb&hellip;ef78">0x71cb&hellip;ef78</span></span></li>
         <li class="org" data-org="2">
-          <div class="org-top"><span class="org-id">#2 bred</span><span class="org-score" data-from="3148" data-score="3821">3821</span></div>
+<div class="org-top"><span class="org-id">#2 improved</span><span class="org-score" data-from="3148" data-score="3821">38.2</span></div>
           <div class="org-genes">colour + size</div>
-          <div class="org-checks"><span>heredity &#10003;</span><span>seed &#10003;</span><span>score &#10003;</span><span>evidence &#10003;</span></div>
+          <div class="org-checks"><span>parent match &#10003;</span><span>fair seed &#10003;</span><span>score &#10003;</span><span>evidence &#10003;</span></div>
           <span class="chip genuine">GENUINE</span>
         </li>
-        <li class="link" data-link="3"><span class="link-line"></span><span class="link-text">commit &middot; block 61187439 &middot; reveal swapped</span></li>
+        <li class="link" data-link="3"><span class="link-line"></span><span class="link-text">claims to be bred from #1 &middot; result swapped</span></li>
         <li class="org org-forged" data-org="3">
-          <div class="org-top"><span class="org-id">#3 &ldquo;trust me&rdquo;</span><span class="org-score" data-from="3148" data-score="4602">4602</span></div>
+          <div class="org-top"><span class="org-id">#3 &ldquo;trust me&rdquo;</span><span class="org-score" data-from="3148" data-score="4602">46.0</span></div>
           <div class="org-genes">colour + size + ring + momentum</div>
-          <div class="org-checks"><span class="x">heredity &#10007;</span><span>seed &#10003;</span><span>score &#10003;</span><span>evidence &#10003;</span></div>
+          <div class="org-checks"><span class="x">parent match &#10007;</span><span>fair seed &#10003;</span><span>score &#10003;</span><span>evidence &#10003;</span></div>
           <span class="chip forged">FORGED</span>
         </li>
       </ol>
@@ -99,7 +99,7 @@
       <li><span>Honest child #2 &middot; GENUINE</span></li>
       <li><span>Forged child #3 &middot; FORGED</span></li>
       <li><span>Re-checked against live Fuji on every push</span></li>
-      <li><span>68 tests passing</span></li>
+      <li><span>72 tests passing</span></li>
       <li><span>No wallet needed to try it</span></li>
       <li><span>MIT licensed</span></li>
     </ul>
@@ -109,7 +109,7 @@
       <li><span>Honest child #2 &middot; GENUINE</span></li>
       <li><span>Forged child #3 &middot; FORGED</span></li>
       <li><span>Re-checked against live Fuji on every push</span></li>
-      <li><span>68 tests passing</span></li>
+      <li><span>72 tests passing</span></li>
       <li><span>No wallet needed to try it</span></li>
       <li><span>MIT licensed</span></li>
     </ul>
@@ -131,7 +131,7 @@
 rerank          off
 temperature     0
 toolPolicy      never</pre>
-        <p class="pane-score"><span class="num">4576</span> bps</p>
+        <p class="pane-score"><span class="num">45.8</span>%</p>
         <ul class="pane-notes">
           <li>1 of 216 combinations looked at</li>
           <li>No record of what else was tried</li>
@@ -144,7 +144,7 @@ toolPolicy      never</pre>
 seed            fixed by a future block
 score           re-measurable by anyone
 random control  reported by default</pre>
-        <p class="pane-score"><span class="num">8333</span> bps</p>
+        <p class="pane-score"><span class="num">83.3</span>%</p>
         <ul class="pane-notes">
           <li>Found after evaluating 45 of 216</li>
           <li>Every candidate has a parent and a seed nobody chose</li>
@@ -223,7 +223,7 @@ forged child #3: <span class="k">FORGED</span> (heredity)
       <article class="card tile tile-wide" data-loop>
         <div class="viz viz-knobs" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
         <h3>Tune a RAG or support agent</h3>
-        <p class="dim">Four knobs, 216 combinations. The starting config scores 4576; the search finds 8333 after evaluating 45.</p>
+        <p class="dim">Four knobs, 216 combinations. The starting config scores 45.8%; the search finds 83.3% after trying 45.</p>
         <code class="tile-code">npm run example:rag</code>
       </article>
       <article class="card tile" data-loop>
@@ -262,7 +262,7 @@ forged child #3: <span class="k">FORGED</span> (heredity)
     <div class="section-head">
       <p class="eyebrow">Try the verifier</p>
       <h2 data-split>A higher score does not help a forged child.</h2>
-      <p class="lede" data-reveal>These are the real organisms on Avalanche Fuji. Pick one and press the button: your browser reads it straight from the chain and re-runs the same checks as <code>verify.js</code>. No wallet, nothing to install.</p>
+      <p class="lede" data-reveal>These are the real configurations recorded on Avalanche Fuji. Pick one and press <b>Check it live</b>: your browser reads it straight from the chain and runs the same four checks anyone can run with one command. No wallet, nothing to install.</p>
     </div>
     <div data-verdict-machine></div>
   </div>
@@ -272,10 +272,10 @@ forged child #3: <span class="k">FORGED</span> (heredity)
 <section class="section stats-section">
   <div class="wrap">
     <div class="stats" data-reveal data-stagger>
-      <div class="stat"><p class="stat-num"><span data-count="4765" data-from="3148">4765</span></p><p class="dim">best fitness on a real ARC-AGI-3 world model, up from 3148, in three generations</p></div>
-      <div class="stat"><p class="stat-num"><span data-count="9955">9,955</span></p><p class="dim">recorded object transitions the reference trial is scored on</p></div>
-      <div class="stat"><p class="stat-num"><span data-count="0.62">0.62</span>%</p><p class="dim">of that space sampled, where selection beats random</p></div>
-      <div class="stat"><p class="stat-num"><span data-count="68">68</span></p><p class="dim">tests passing, including one that forges a child and catches it</p></div>
+      <div class="stat"><p class="stat-num"><span data-count="47.7" data-from="31.5">47.7</span>%</p><p class="dim">best score on a real ARC-AGI-3 game agent, up from 31.5%, in three generations</p></div>
+      <div class="stat"><p class="stat-num"><span data-count="9955">9,955</span></p><p class="dim">real recorded game moves that score is measured on</p></div>
+      <div class="stat"><p class="stat-num"><span data-count="0.62">0.62</span>%</p><p class="dim">of all possible settings tried, and it still beat random picking</p></div>
+      <div class="stat"><p class="stat-num"><span data-count="72">72</span></p><p class="dim">tests passing, including one that forges a child and catches it</p></div>
     </div>
   </div>
 </section>
@@ -288,11 +288,12 @@ forged child #3: <span class="k">FORGED</span> (heredity)
       <h2 data-split>The parts people ask about first.</h2>
     </div>
     <div class="faq" data-reveal data-stagger>
+      <details><summary>What do the scores mean?</summary><p>A score is whatever your own eval returns for a configuration, shown as a percentage. Higher is better. On chain it is stored in basis points, so 3148 means 31.48%.</p></details>
       <details><summary>Does my data leave my machine?</summary><p>No. Your eval runs where it runs today. When you turn on provenance, the chain stores a 32-byte hash of each configuration and its score; the configurations themselves stay with you. Nothing sits in your request path.</p></details>
       <details><summary>Do I need a wallet or crypto to use it?</summary><p>No. The search runs entirely locally. A team can try it in a minute with no wallet and turn on provenance later, when they need to show someone.</p></details>
       <details><summary>Is it a better optimiser than random search?</summary><p>Not always, and it says so. On a small space where you can sample a fifth of everything, random wins. On a real space sampled under one percent, selection is ahead. <code>search()</code> runs the random control by default and reports the winner.</p></details>
       <details><summary>Why involve a chain at all?</summary><p>So that the customer verifies the record themselves rather than trusting the vendor who produced it. The seed for each child comes from a block that did not exist when the breeder committed, which is something only a chain can supply.</p></details>
-      <details><summary>What does a GENUINE verdict actually prove?</summary><p>Where a configuration came from: which parent, which seed, and that the seed was fixed by a block that did not exist yet. And that the attested score is the score your eval gives. It does not prove your eval measures the right thing. That part is yours.</p></details>
+      <details><summary>What does a GENUINE verdict actually prove?</summary><p>Where a configuration came from: which parent, which random seed, and that the seed was fixed by a block that did not exist yet, so nobody could pick a lucky one. And that the claimed score is the score your eval really gives. It does not prove your eval measures the right thing. That part is yours.</p></details>
       <details><summary>What is not done yet?</summary><p>The curator role is centralised, an attestor is trusted to report honestly (dishonesty is detectable afterwards, not prevented), and fitness comes from one trial. C-Chain mainnet is next. The README lists every limitation.</p></details>
     </div>
   </div>

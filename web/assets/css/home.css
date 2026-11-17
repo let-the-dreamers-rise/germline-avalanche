@@ -30,7 +30,7 @@
 .org-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .org-id { font: 500 0.82rem/1 var(--mono); color: var(--dim); }
 .org-score { font: 600 1.5rem/1 var(--display); font-variant-numeric: tabular-nums; }
-.org-score::after { content: " bps"; font: 400 0.75rem var(--mono); color: var(--faint); }
+.org-score::after { content: "%"; font: 500 0.95rem var(--display); color: var(--dim); margin-left: 1px; }
 .org-genes { font: 400 0.9rem/1.3 var(--mono); }
 .org-checks { display: flex; flex-wrap: wrap; gap: 6px 12px; font: 400 0.76rem/1 var(--mono); color: var(--ok); }
 .org-checks .x { color: var(--avax-hot); }
