@@ -1,0 +1,46 @@
+/* The verdict machine. */
+.vm { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--base-2); overflow: hidden; }
+.vm-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; padding: 16px; border-bottom: 1px solid var(--line); background: var(--steel); }
+.vm-pick { display: inline-flex; padding: 4px; gap: 4px; border-radius: 999px; background: var(--base); border: 1px solid var(--line); }
+.vm-tab {
+  border: 0; background: transparent; color: var(--dim); padding: 10px 16px; border-radius: 999px; cursor: pointer;
+  font: 500 0.9rem/1 var(--sans); transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.vm-tab:hover { color: var(--ink); }
+.vm-tab[aria-pressed="true"] { background: var(--steel-2); color: var(--ink); }
+.vm-run:disabled { opacity: 0.6; cursor: progress; transform: none; }
+.vm-body { padding: clamp(18px, 3vw, 30px); display: grid; gap: 18px; position: relative; }
+.vm-meta { font: 400 0.88rem/1.5 var(--mono); color: var(--dim); }
+.vm-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.vm-check {
+  display: grid; grid-template-columns: 28px 96px 1fr; align-items: center; gap: 12px; padding: 12px 14px;
+  border: 1px solid var(--line-soft); border-radius: var(--r-sm); background: var(--base);
+  transition: border-color var(--medium) var(--ease), background var(--medium) var(--ease);
+}
+.vm-mark { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 600 0.85rem/1 var(--sans); background: var(--steel-2); color: var(--faint); }
+.vm-label { font: 600 0.95rem/1 var(--display); }
+.vm-detail { font: 400 0.8rem/1.45 var(--mono); color: var(--dim); overflow-wrap: anywhere; }
+.vm-check.running { border-color: var(--faint); }
+.vm-check.running .vm-mark { animation: pulse 0.6s var(--ease) infinite alternate; }
+.vm-check.pass .vm-mark { background: var(--ok-wash); color: var(--ok); }
+.vm-check.fail { border-color: rgba(232, 65, 66, 0.55); background: var(--avax-wash); }
+.vm-check.fail .vm-mark { background: var(--avax); color: #fff; }
+@keyframes pulse { from { opacity: 0.35; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+.vm-stamp {
+  justify-self: start; min-height: 52px; padding: 12px 20px; border-radius: var(--r-sm); border: 2px solid transparent;
+  font: 700 1.3rem/1 var(--display); letter-spacing: 0.04em; opacity: 0; transform: scale(1.25) rotate(-4deg);
+  transition: opacity var(--fast) var(--ease), transform var(--medium) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.vm-stamp.show { opacity: 1; transform: scale(1) rotate(-2deg); }
+.vm-stamp.genuine { color: var(--ok); border-color: var(--ok); background: var(--ok-wash); }
+.vm-stamp.forged { color: var(--avax-hot); border-color: var(--avax); background: var(--avax-wash); }
+.vm-foot { padding: 14px 16px; border-top: 1px solid var(--line); color: var(--dim); font-size: 0.9rem; }
+.vm-foot a { color: var(--ink); text-underline-offset: 3px; }
+.vm-foot a:hover { color: var(--avax-hot); }
+@media (max-width: 560px) {
+  .vm-check { grid-template-columns: 28px 1fr; }
+  .vm-detail { grid-column: 1 / -1; }
+  .vm-pick { width: 100%; }
+  .vm-tab { flex: 1; padding-inline: 8px; }
+  .vm-run { width: 100%; justify-content: center; }
+}

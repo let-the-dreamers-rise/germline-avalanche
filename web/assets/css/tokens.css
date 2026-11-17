@@ -1,0 +1,54 @@
+/* Germline design tokens. Direction: "Proof Machine" -- claims go in,
+   verdicts come out. One easing family (power3 in/out, mechanical), one
+   timing scale, one accent (Avalanche red) and one verdict colour each way. */
+
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+:root {
+  color-scheme: dark;
+
+  --base: #0b0c0f;
+  --base-2: #0f1115;
+  --steel: #16191f;
+  --steel-2: #1d2129;
+  --line: #272b34;
+  --line-soft: #1e2128;
+  --ink: #f1f2f4;
+  --dim: #9aa0ab;
+  --faint: #646a76;
+  --avax: #e84142;
+  --avax-hot: #ff6b5e;
+  --avax-wash: rgba(232, 65, 66, 0.12);
+  --ok: #3fbf8a;
+  --ok-wash: rgba(63, 191, 138, 0.12);
+
+  --display: "Space Grotesk", system-ui, sans-serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --fast: 150ms;
+  --medium: 350ms;
+  --slow: 800ms;
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+
+  --gutter: clamp(16px, 4vw, 40px);
+  --max: 1180px;
+  --section-y: clamp(72px, 12vw, 148px);
+
+  --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.86rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.08rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  --step-2: clamp(1.5rem, 1.25rem + 1.2vw, 2.2rem);
+  --step-3: clamp(2rem, 1.5rem + 2.4vw, 3.4rem);
+  --step-4: clamp(2.5rem, 1.6rem + 4.4vw, 5.4rem);
+  --step-5: clamp(3.4rem, 1.4rem + 10vw, 12rem);
+}
