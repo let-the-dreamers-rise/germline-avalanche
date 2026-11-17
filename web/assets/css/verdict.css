@@ -11,6 +11,8 @@
 .vm-run:disabled { opacity: 0.6; cursor: progress; transform: none; }
 .vm-body { padding: clamp(18px, 3vw, 30px); display: grid; gap: 18px; position: relative; }
 .vm-meta { font: 400 0.88rem/1.5 var(--mono); color: var(--dim); }
+.vm-status { font: 400 0.9rem/1.5 var(--sans); color: var(--ink); }
+.vm-status:empty { display: none; }
 .vm-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .vm-check {
   display: grid; grid-template-columns: 28px 96px 1fr; align-items: center; gap: 12px; padding: 12px 14px;

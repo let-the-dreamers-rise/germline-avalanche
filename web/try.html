@@ -17,13 +17,15 @@
 <link rel="stylesheet" href="assets/css/tokens.css" />
 <link rel="stylesheet" href="assets/css/base.css" />
 <link rel="stylesheet" href="assets/css/try.css" />
+<link rel="stylesheet" href="assets/css/verdict.css" />
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
 <script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/verdict.js"></script>
 </head>
 <body>
-<a class="skip" href="#local">Skip to the demo</a>
+<a class="skip" href="#check">Skip to the demo</a>
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="index.html" aria-label="Germline home">
@@ -46,14 +48,24 @@
     <p class="eyebrow">Try it &middot; nothing to install</p>
     <h1 data-split>Tune a configuration here. Then prove it on Avalanche.</h1>
     <p class="lede">Tune an AI configuration, and keep a record of how you found it that <b>anyone can check</b> without trusting you.</p>
-    <p class="sub">Two steps. The first runs entirely in this page. The second records the same kind of search on Avalanche's Fuji test network, from a test wallet this page makes for you, and then verifies every step against the chain.</p>
+    <p class="sub">Start with a ten-second check of a real record on Avalanche. Then run a search in this page, and record one of your own on Avalanche's Fuji test network from a test wallet this page makes for you. Nothing to install; only the last step needs free test AVAX.</p>
     <ul class="jump">
+      <li><a href="#check"><b>00</b> Check a real record</a></li>
       <li><a href="#local"><b>01</b> Search in your browser</a></li>
       <li><a href="#chain"><b>02</b> Record it on Fuji</a></li>
       <li><a href="#own"><b>03</b> Use your own system</a></li>
       <li><a href="#terminal"><b>$</b> Prefer the terminal</a></li>
     </ul>
   </header>
+
+  <!-- 0. check the live record -->
+  <section id="check">
+    <span class="eyebrow">Start here &middot; ten seconds, no wallet</span>
+    <h2>Check a real record on Avalanche</h2>
+    <p>Two children were bred on Fuji from the same parent. One is honest. The other was forged to claim a better configuration. Press the button: your browser reads them straight from the chain and re-runs the checks, so you don't have to trust this page either.</p>
+    <div data-verdict-machine></div>
+    <noscript><p>Honest child #2: GENUINE. Forged child #3: FORGED, heredity failed. Run <code>npm run recheck:fuji</code> to check both yourself.</p></noscript>
+  </section>
 
   <!-- 1. local search -->
   <section id="local">
