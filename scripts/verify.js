@@ -29,13 +29,56 @@ const { mutate } = require("../engine/mutate");
 const { evaluate } = require("../engine/fitness");
 const { genomeForRoot } = require("../engine/space");
 const genomes = require("../lib/genomes");
-const { loadDeployment, assertChainMatches, queryAll } = require("../lib/chain");
+const {
+  loadDeployment,
+  assertChainMatches,
+  queryAll,
+  withRetry,
+  hardenProvider,
+  firstBlockAtOrAfter,
+} = require("../lib/chain");
+
+// Mirrors Germline.SPAWN_WINDOW: a commitment is only usable for this many
+// blocks, so the request a birth consumed sits at most this far behind it.
+const SPAWN_WINDOW = 250;
 
 // Recover the ordinal this child was born under -- the number of siblings the
-// parent had already produced -- and the block it was born in. The contract
-// folds the ordinal into the seed and then keeps only the running total, so
-// the count has to come back out of the log.
-async function birthOf(germline, parentId, childId, fromBlock) {
+// parent had already produced -- and the block it was born in.
+//
+// Ids only ever increase, so the ordinal is simply how many organisms between
+// the parent and the child name the same parent: no logs needed. The birth
+// block is found from the recorded birth time by binary search, and then a
+// single narrow log query confirms it. Scanning every log since deployment
+// also works, and is the fallback, but a public RPC throttles that long before
+// it finishes.
+async function birthOf(germline, parentId, childId, fromBlock, child) {
+  let ordinal = 0;
+  for (let id = Number(parentId) + 1; id < Number(childId); id++) {
+    const sibling = await withRetry(() => germline.organismOf(id));
+    if (sibling.parent === BigInt(parentId)) ordinal++;
+  }
+
+  const provider = hre.ethers.provider;
+  try {
+    const latest = await withRetry(() => provider.getBlockNumber());
+    const near = await firstBlockAtOrAfter(
+      provider,
+      Number(child.bornAt),
+      Number(fromBlock || 0),
+      latest
+    );
+    // Several blocks can share a timestamp, so look a little either side.
+    const found = await queryAll(germline, germline.filters.Spawned(childId), {
+      fromBlock: Math.max(0, near - 5),
+      toBlock: Math.min(latest, near + 300),
+    });
+    if (found.length > 0) {
+      return { ordinal, spawnBlock: found[0].blockNumber };
+    }
+  } catch (error) {
+    // Fall through to the full scan below.
+  }
+
   const events = await queryAll(
     germline,
     germline.filters.Spawned(null, parentId),
@@ -77,6 +120,8 @@ async function resolveContract(hre) {
 /// a caller that wants a non-zero exit code needs to do nothing further.
 async function verify(options = {}) {
   const log = options.log || console.log;
+  // A public RPC throttles bursts; every read below should wait, not crash.
+  hardenProvider(hre);
   const { address, fromBlock } = await resolveContract(hre);
   const germline = await hre.ethers.getContractAt("Germline", address);
 
@@ -158,12 +203,17 @@ async function verify(options = {}) {
   // what a node will serve, not evidence against the lineage.
   let seedCheck = null;
   try {
-    const birth = await birthOf(germline, child.parent, childId, fromBlock);
+    const birth = await birthOf(germline, child.parent, childId, fromBlock, child);
     const ordinal = birth.ordinal;
+    // The commitment must have been made within SPAWN_WINDOW blocks of the
+    // birth, so only that stretch needs reading.
     const requests = await queryAll(
       germline,
       germline.filters.SpawnRequested(child.parent),
-      { fromBlock }
+      {
+        fromBlock: Math.max(Number(fromBlock || 0), birth.spawnBlock - SPAWN_WINDOW - 1),
+        toBlock: birth.spawnBlock,
+      }
     );
     // The commitment this birth consumed is the parent's latest request made
     // before the child was minted; earlier ones were spent by its siblings.
@@ -173,7 +223,7 @@ async function verify(options = {}) {
     if (!request) throw new Error("no SpawnRequested event precedes this birth");
 
     const requestBlock = Number(request.args.requestBlock);
-    const block = await hre.ethers.provider.getBlock(requestBlock);
+    const block = await withRetry(() => hre.ethers.provider.getBlock(requestBlock));
     if (!block) throw new Error("block " + requestBlock + " is no longer served");
 
     const seed = hre.ethers.solidityPackedKeccak256(

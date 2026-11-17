@@ -26,7 +26,8 @@ const { found } = require("../scripts/found");
 const { breed } = require("../scripts/breed");
 const { verify } = require("../scripts/verify");
 const { forge } = require("../scripts/forge");
-const { e2e } = require("../scripts/e2e");
+const { e2e, breedAlive } = require("../scripts/e2e");
+const { recheck } = require("../scripts/recheck");
 
 const SURVIVAL = 3148; // the measured action-only baseline; see engine/fitness.js
 const STEP = 500;
@@ -258,10 +259,77 @@ describe("lifecycle scripts", function () {
     const file = path.join(deploymentsDir, hre.network.name + "-e2e.json");
     expect(fs.existsSync(file)).to.equal(true);
   });
+  it("e2e.js commits again when a seed is stillborn, instead of abandoning the run", async function () {
+    const stillborn = () => new Error("stillborn: the seed produced 0x00, a genome that already exists");
+    // Two stillbirths, then a live child: the run carries on and returns it.
+    let calls = 0;
+    const flaky = async () => {
+      calls++;
+      if (calls <= 2) throw stillborn();
+      return { childId: 2 };
+    };
+    expect(await breedAlive({}, noop, 5, flaky)).to.deep.equal({ childId: 2 });
+    expect(calls).to.equal(3);
+
+    // It gives up after the stated number of commitments rather than looping.
+    calls = 0;
+    let caught = null;
+    try {
+      await breedAlive({}, noop, 3, async () => { calls++; throw stillborn(); });
+    } catch (error) {
+      caught = error;
+    }
+    expect(calls).to.equal(3);
+    expect(String(caught.message)).to.match(/^stillborn/);
+
+    // Any other failure surfaces at once; it is never retried away.
+    calls = 0;
+    caught = null;
+    try {
+      await breedAlive({}, noop, 5, async () => { calls++; throw new Error("NotSteward"); });
+    } catch (error) {
+      caught = error;
+    }
+    expect(calls).to.equal(1);
+    expect(caught.message).to.equal("NotSteward");
+
+    // And against the real chain it lands a real child.
+    await found({ log: noop });
+    const child = await withBlockPump(breedAlive({ parentId: 1, log: noop }, noop, 8));
+    expect(child.childId).to.equal(2);
+  });
+  it("recheck.js reproduces both recorded verdicts read-only", async function () {
+    await withBlockPump(e2e({ log: noop }));
+    const before = await ethers.provider.getBlockNumber();
+    const result = await recheck({ log: noop });
+    expect(result.ok).to.equal(true);
+    expect(result.honest.genuine).to.equal(true);
+    expect(result.forged.genuine).to.equal(false);
+    expect(result.forged.mismatches).to.deep.equal(["heredity"]);
+    // Both seeds were re-derived from the chain, not taken on trust.
+    expect(result.honest.seed.holds).to.equal(true);
+    expect(result.forged.seed.holds).to.equal(true);
+    // Read-only means read-only: no transaction, so no new block.
+    expect(await ethers.provider.getBlockNumber()).to.equal(before);
+  });
+  it("recheck.js fails when a receipt passes a forged child off as honest", async function () {
+    const receipt = await withBlockPump(e2e({ log: noop }));
+    const swapped = { ...receipt, honestChild: receipt.forgedChild, forgedChild: receipt.honestChild };
+    let caught = null;
+    try {
+      await recheck({ log: noop, receipt: swapped });
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught, "a swapped receipt must not pass").to.not.equal(null);
+    expect(caught.result.ok).to.equal(false);
+    expect(caught.result.problems.join(" ")).to.match(/no longer verifies/);
+    expect(caught.result.problems.join(" ")).to.match(/verified as GENUINE/);
+  });
   it("verify.js re-derives the seed when the RPC caps log ranges", async function () {
     const { queryAll } = require("../lib/chain");
     await found({ log: noop });
-    const child = await withBlockPump(breed({ parentId: 1, log: noop }));
+    const child = await withBlockPump(breedAlive({ parentId: 1, log: noop }, noop, 8));
     // Simulate a provider that refuses any range wider than 3 blocks.
     const germline = this.germline;
     const real = germline.queryFilter.bind(germline);
@@ -269,8 +337,94 @@ describe("lifecycle scripts", function () {
       if (to - from > 3) throw new Error("block range too large");
       return real(filter, from, to);
     };
+    process.env.GERMLINE_LOG_PAUSE_MS = "0";
     const events = await queryAll(germline, germline.filters.Spawned(), { fromBlock: 0, span: 50 });
+    delete process.env.GERMLINE_LOG_PAUSE_MS;
     germline.queryFilter = real;
     expect(events.map((e) => Number(e.args.id))).to.include(child.childId);
+  });
+  it("queryAll waits out a throttling RPC instead of failing", async function () {
+    const { queryAll } = require("../lib/chain");
+    await found({ log: noop });
+    await withBlockPump(breedAlive({ parentId: 1, log: noop }, noop, 8));
+    const germline = this.germline;
+    const real = germline.queryFilter.bind(germline);
+    let calls = 0;
+    germline.queryFilter = async (filter, from, to) => {
+      calls++;
+      if (calls % 2 === 1) throw new Error("Too Many Requests");
+      return real(filter, from, to);
+    };
+    process.env.GERMLINE_LOG_PAUSE_MS = "0";
+    process.env.GERMLINE_RPC_DELAY_MS = "1";
+    const events = await queryAll(germline, germline.filters.Spawned(), {
+      fromBlock: 0,
+      span: 5,
+    });
+    germline.queryFilter = real;
+    delete process.env.GERMLINE_LOG_PAUSE_MS;
+    delete process.env.GERMLINE_RPC_DELAY_MS;
+    expect(events.length).to.equal(1);
+  });
+
+  it("verify.js finds the birth block without scanning every log", async function () {
+    await found({ log: noop });
+    const child = await withBlockPump(breedAlive({ parentId: 1, log: noop }, noop, 8));
+    // Pad the chain so a full scan would need many windows, then refuse any
+    // log query wider than 3 blocks from the start of the chain.
+    await mine(400);
+    const germline = this.germline;
+    const realFactory = ethers.Contract.prototype.queryFilter;
+    let wide = 0;
+    ethers.Contract.prototype.queryFilter = async function (filter, from, to) {
+      if (to - from > 350) wide++;
+      return realFactory.call(this, filter, from, to);
+    };
+    try {
+      const result = await verify({ childId: child.childId, log: noop });
+      expect(result.seed.holds).to.equal(true);
+      expect(wide).to.equal(0);
+    } finally {
+      ethers.Contract.prototype.queryFilter = realFactory;
+    }
+  });
+  it("verify.js finishes even when the RPC throttles every few calls", async function () {
+    await found({ log: noop });
+    // A mutation can land on a genome already born ("stillborn"); that is a
+    // real outcome of descent, so try the next commitment rather than fail.
+    let child = null;
+    for (let attempt = 0; attempt < 4 && !child; attempt++) {
+      try {
+        child = await withBlockPump(breed({ parentId: 1, log: noop }));
+      } catch (error) {
+        if (!/stillborn/.test(error.message)) throw error;
+      }
+    }
+    const provider = hre.network.provider;
+    const original = provider.send;
+    const wasHardened = provider.__germlineHardened;
+    delete provider.__germlineHardened;
+    let calls = 0;
+    let refused = 0;
+    provider.send = function (method, params) {
+      calls++;
+      if (calls % 4 === 0) {
+        refused++;
+        return Promise.reject(new Error("Too Many Requests"));
+      }
+      return original.call(provider, method, params);
+    };
+    process.env.GERMLINE_RPC_DELAY_MS = "1";
+    try {
+      const result = await verify({ childId: child.childId, log: noop });
+      expect(refused).to.be.greaterThan(0);
+      expect(result.genuine).to.equal(true);
+      expect(result.seed.holds).to.equal(true);
+    } finally {
+      provider.send = original;
+      if (wasHardened) provider.__germlineHardened = wasHardened;
+      else delete provider.__germlineHardened;
+      delete process.env.GERMLINE_RPC_DELAY_MS;
+    }
   });
 });

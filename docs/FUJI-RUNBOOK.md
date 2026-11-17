@@ -37,8 +37,21 @@ This does, on chain:
    produce, then an honest `attestFitness` for it
 5. `verify.js` on the forged child: **VERDICT: FORGED** (heredity fails)
 
-It exits non-zero unless step 3 says GENUINE and step 5 says FORGED. The
-forged organism stays on chain, so anyone can re-check it later:
+It exits non-zero unless step 3 says GENUINE and step 5 says FORGED. About
+one seed in twelve mutates the founder into itself ("stillborn"); nothing is
+minted, and the run commits again for a fresh seed rather than stopping.
+
+Both organisms stay on chain, so anyone can re-check them later with no key
+and no gas:
+
+```powershell
+npm run recheck:fuji
+```
+
+That reads `deployments/fuji-e2e.json`, verifies both organisms again, and
+passes only if the honest one is GENUINE and the forged one is FORGED for the
+recorded reason. CI runs the same command on every push. To see one organism
+in full:
 
 ```powershell
 $env:CHILD_ID=3; npx hardhat run scripts/verify.js --network fuji
@@ -52,6 +65,7 @@ Same commands with `avalanche` in place of `fuji` and real AVAX on the key:
 npm run deploy:avalanche
 npx hardhat verify --network avalanche <address> 3148 500 4
 npm run e2e:avalanche
+npm run recheck:avalanche
 ```
 
 ## Notes
@@ -60,4 +74,10 @@ npm run e2e:avalanche
   because the public Fuji RPC refuses `eth_getLogs` ranges wider than 100
   blocks. If a provider refuses even that, it halves the window and retries.
   `GERMLINE_LOG_SPAN` overrides the starting window.
+- The public RPC also throttles bursts ("Too Many Requests"). Every RPC call
+  hardhat sends during a verify waits and retries with backoff (up to about
+  a minute) instead of failing, and
+  verify.js finds a child's birth block from its recorded birth time (a
+  binary search), then reads only the 250 blocks before it. So a re-check
+  costs a few dozen small requests however old the contract is.
 - Commit the `deployments/*.json` files afterwards so the addresses are public.

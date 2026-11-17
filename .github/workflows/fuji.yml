@@ -1,0 +1,50 @@
+name: Fuji re-check
+
+# Two things, on a clean machine with no key:
+#   1. the test suite;
+#   2. a read-only re-check of the lineage that is live on Avalanche Fuji --
+#      the honest child must verify as GENUINE and the forged child must be
+#      rejected as FORGED. The verdict table is on each run's summary page.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fuji-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx hardhat test
+
+  recheck:
+    name: Live Fuji lineage (honest GENUINE, forged FORGED)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # No DEPLOYER_KEY is set anywhere in this workflow: the re-check only
+      # reads, against the public Fuji RPC.
+      - name: Re-check both organisms against the chain
+        run: npx hardhat run scripts/recheck.js --network fuji
