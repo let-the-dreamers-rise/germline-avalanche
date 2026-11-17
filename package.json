@@ -49,7 +49,10 @@
     "agent": "node scripts/agent.js",
     "check": "node scripts/check.js",
     "build:web": "node scripts/build-web.js",
-    "forge:fuji": "hardhat run scripts/forge.js --network fuji"
+    "forge:fuji": "hardhat run scripts/forge.js --network fuji",
+    "payloads:fuji": "hardhat run scripts/publish-payloads.js --network fuji",
+    "payloads:avalanche": "hardhat run scripts/publish-payloads.js --network avalanche",
+    "check:payloads": "node scripts/payload-check.js"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

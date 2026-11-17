@@ -1,0 +1,101 @@
+{
+  "base": "https://germline-avalanche.vercel.app/blobs",
+  "payloads": [
+    {
+      "network": "fuji",
+      "chainId": 43113,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 1,
+      "kind": "genome",
+      "root": "0xd66b1ab21199c3b6c5473b11ccfdb781db2d8ce4a89b432ffb3f95b92527cb53"
+    },
+    {
+      "network": "fuji",
+      "chainId": 43113,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 1,
+      "kind": "evidence",
+      "root": "0x51de4986f53cee11b6499fd865ec5cb8a230acc7e05dd6b0ad17fc27047df3da"
+    },
+    {
+      "network": "fuji",
+      "chainId": 43113,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 2,
+      "kind": "genome",
+      "root": "0x454fd16130e4129c517e6507c072af54e3f4a44a86cfe01080da8fa2f7418eee"
+    },
+    {
+      "network": "fuji",
+      "chainId": 43113,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 2,
+      "kind": "evidence",
+      "root": "0x22c0ecdc94c0955753cc13566f432ed24da933ae46807a6b54a9de4deae0aefe"
+    },
+    {
+      "network": "fuji",
+      "chainId": 43113,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 3,
+      "kind": "genome",
+      "root": "0x253ed6f44c64e546f3e6e534a54b6a3ba382e5392b82197e02d5504b1b2edf5c"
+    },
+    {
+      "network": "fuji",
+      "chainId": 43113,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 3,
+      "kind": "evidence",
+      "root": "0xb1bfca17f6e811a926726ce1a7530e3557e33d9e06f85973afeb1267246f0682"
+    },
+    {
+      "network": "avalanche",
+      "chainId": 43114,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 1,
+      "kind": "genome",
+      "root": "0xd66b1ab21199c3b6c5473b11ccfdb781db2d8ce4a89b432ffb3f95b92527cb53"
+    },
+    {
+      "network": "avalanche",
+      "chainId": 43114,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 1,
+      "kind": "evidence",
+      "root": "0x51de4986f53cee11b6499fd865ec5cb8a230acc7e05dd6b0ad17fc27047df3da"
+    },
+    {
+      "network": "avalanche",
+      "chainId": 43114,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 2,
+      "kind": "genome",
+      "root": "0x7b6d13eec62f8d4aa06bf4eb3690e5bfac3476eed715d201d74bb8ebf05dab55"
+    },
+    {
+      "network": "avalanche",
+      "chainId": 43114,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 2,
+      "kind": "evidence",
+      "root": "0xf56eb8598d73dfa75edd11ff0e4ac0df006cb0075f1dd8239291a1aff5d16ff8"
+    },
+    {
+      "network": "avalanche",
+      "chainId": 43114,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 3,
+      "kind": "genome",
+      "root": "0x253ed6f44c64e546f3e6e534a54b6a3ba382e5392b82197e02d5504b1b2edf5c"
+    },
+    {
+      "network": "avalanche",
+      "chainId": 43114,
+      "contract": "0xA0448Cd63f746a60447cfF1817ec9781C25F7b25",
+      "organism": 3,
+      "kind": "evidence",
+      "root": "0xb1bfca17f6e811a926726ce1a7530e3557e33d9e06f85973afeb1267246f0682"
+    }
+  ]
+}

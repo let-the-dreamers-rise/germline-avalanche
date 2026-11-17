@@ -10,9 +10,9 @@ deployments/*.local.json
 
 # Content-addressed caches. Reproducible from the chain plus the engine, so
 # committing them would only add noise.
-storage/
-genomes/
-blobs/
+/storage/
+/genomes/
+/blobs/
 
 # Netlify CLI local state. Site id only, but tooling state does not belong in the repo.
 .netlify/
