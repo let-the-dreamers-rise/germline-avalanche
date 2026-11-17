@@ -22,6 +22,24 @@ const { verify } = require("./verify");
 const { forge } = require("./forge");
 const { loadDeployment, deploymentsDir, txLink, addressLink } = require("../lib/chain");
 
+// About 8.5% of seeds mutate the founder into itself (see engine/mutate.js),
+// and breed() rightly refuses to mint that duplicate. Nothing is minted, the
+// commitment is spent, and the next block fixes a fresh seed -- so commit
+// again rather than abandon a run that has already founded and paid for it.
+async function breedAlive(options, log, tries = 5, breedOnce = breed) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await breedOnce(options);
+    } catch (error) {
+      if (!/^stillborn/.test(String(error.message)) || attempt >= tries) throw error;
+      log("");
+      log("stillborn on attempt " + attempt + ": that seed reproduced an existing genome.");
+      log("Nothing was minted. Committing again for a fresh seed.");
+      log("");
+    }
+  }
+}
+
 async function e2e(options = {}) {
   const log = options.log || console.log;
   const network = hre.network.name;
@@ -32,7 +50,7 @@ async function e2e(options = {}) {
   const founder = await found({ log });
 
   section("2. breed one honest child (commit, wait, reveal)");
-  const child = await breed({ log, parentId: founder.id });
+  const child = await breedAlive({ log, parentId: founder.id }, log);
 
   section("3. verify the honest child");
   const genuine = await verify({ log, childId: child.childId });
@@ -86,4 +104,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { e2e };
+module.exports = { e2e, breedAlive };

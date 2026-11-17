@@ -113,7 +113,7 @@ The faucet is at <https://build.avax.network/console/primary-network/faucet>.
 
 ## Status
 
-- Contract compiles for `paris`; **59/59 tests pass** locally, and the original 53 pass
+- Contract compiles for `paris`; **62/62 tests pass** locally, and the original 53 pass
   against a live Fuji fork.
 - Networks, explorers and deploy scripts are wired.
 - Storage substitute is **built and tested** (`lib/store.js`), and the 0G
@@ -128,7 +128,28 @@ The faucet is at <https://build.avax.network/console/primary-network/faucet>.
 - **C-Chain mainnet: not yet.** Same commands with `avalanche` in place of
   `fuji`; see [FUJI-RUNBOOK.md](FUJI-RUNBOOK.md).
 
-Re-check the forged child yourself (PowerShell):
+Re-check both organisms yourself. It only reads, so it needs no key and no
+gas:
+
+```
+npm install
+npm run recheck:fuji
+```
+
+It passes only if the honest child still verifies GENUINE and the forged child
+is still rejected FORGED on heredity alone, with both seeds re-derived from
+Fuji's own block hashes. The same command runs in CI on every push
+([Fuji re-check](https://github.com/let-the-dreamers-rise/germline-avalanche/actions/workflows/fuji.yml)),
+and the verdict table is on each run's summary page.
+
+One thing worth knowing before you click through to Snowtrace: the forged
+child's reveal transaction **succeeds** on chain, and that is by design. The
+contract records the commitment, the seed and the revealed root. It holds
+roots, not genomes, so it cannot run the mutation itself. What fails is
+re-deriving that child from its parent and the recorded seed, and anyone can
+do that, forever, without asking the breeder for anything.
+
+To look at one organism in full (PowerShell):
 
 ```powershell
 $env:CHILD_ID=3; npx hardhat run scripts/verify.js --network fuji

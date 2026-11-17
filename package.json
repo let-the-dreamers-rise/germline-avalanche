@@ -41,6 +41,8 @@
     "demo": "node scripts/demo.js",
     "e2e:fuji": "hardhat run scripts/e2e.js --network fuji",
     "e2e:avalanche": "hardhat run scripts/e2e.js --network avalanche",
+    "recheck:fuji": "hardhat run scripts/recheck.js --network fuji",
+    "recheck:avalanche": "hardhat run scripts/recheck.js --network avalanche",
     "forge:fuji": "hardhat run scripts/forge.js --network fuji"
   },
   "devDependencies": {
