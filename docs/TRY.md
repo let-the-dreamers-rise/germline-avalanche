@@ -1,7 +1,7 @@
 # Try Germline
 
 **Quickest: in your browser.** Open the
-[try page](https://raw.githack.com/let-the-dreamers-rise/germline-avalanche/main/web/try.html). It runs a real search on
+[try page](https://germline-avalanche.vercel.app/try). It runs a real search on
 your screen with nothing to install, then records it on Avalanche Fuji from a
 throwaway test wallet the page makes for you, and checks every organism against
 the chain. The page is `web/try.html` in this repo; open it locally with any
